@@ -2,7 +2,7 @@
 
 A graph database, for Clojure and ClojureScript.
 
-The latest version is :
+The latest version is:
 
 [![Clojars Project](http://clojars.org/org.clojars.quoll/asami/latest-version.svg)](http://clojars.org/org.clojars.quoll/asami)
 
@@ -330,7 +330,7 @@ The command will also work on `local` stores, which means that they can be loade
 ## License
 
 Copyright © 2016-2021 Cisco Systems
-Copyright © 2015-2021 Paula Gearon
+Copyright © 2015-2022 Paula Gearon
 
 Portions of src/asami/cache.cljc are Copyright © Rich Hickey
 
