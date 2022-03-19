@@ -7,8 +7,8 @@
 
 (s/defrecord TestGraph [data n]
   node/NodeAPI
-  (data-attribute [store data] :tg/first)
-  (container-attribute [store data] :tg/contains)
+  (data-attribute [store data] :a/first)
+  (container-attribute [store data] :a/contains)
   (new-node [store]
     (let [v (swap! n inc)]
       (keyword "test" (str "n" v))))

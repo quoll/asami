@@ -76,25 +76,25 @@
         two (tempids -2)]
     (is (= 21 (count tx-data)))
     (is (= #{[one :db/ident one]
-             [one :tg/entity true]
+             [one :a/entity true]
              [one :name "Maksim"]
              [one :age 45]
              [one :wife two]}
            (->> tx-data
                 (filter #(= one (first %)))
                 (remove #(= :aka (second %)))
-                (remove #(= :tg/owns (second %)))
+                (remove #(= :a/owns (second %)))
                 (map (partial take 3))
                 set)))
     (is (= #{[two :db/ident two]
-             [two :tg/entity true]
+             [two :a/entity true]
              [two :name "Anna"]
              [two :age 31]
              [two :husband one]}
            (->> tx-data
                 (filter #(= two (first %)))
                 (remove #(= :aka (second %)))
-                (remove #(= :tg/owns (second %)))
+                (remove #(= :a/owns (second %)))
                 (map (partial take 3))
                 set))))
 
@@ -114,25 +114,25 @@
         two (tempids "anna")]
     (is (= 21 (count tx-data)))
     (is (= #{[one :db/ident "maksim"]
-             [one :tg/entity true]
+             [one :a/entity true]
              [one :name "Maksim"]
              [one :age 45]
              [one :wife two]}
            (->> tx-data
                 (filter #(= one (first %)))
                 (remove #(= :aka (second %)))
-                (remove #(= :tg/owns (second %)))
+                (remove #(= :a/owns (second %)))
                 (map (partial take 3))
                 set)))
     (is (= #{[two :db/ident "anna"]
-             [two :tg/entity true]
+             [two :a/entity true]
              [two :name "Anna"]
              [two :age 31]
              [two :husband one]}
            (->> tx-data
                 (filter #(= two (first %)))
                 (remove #(= :aka (second %)))
-                (remove #(= :tg/owns (second %)))
+                (remove #(= :a/owns (second %)))
                 (map (partial take 3))
                 set))))
 
@@ -234,7 +234,7 @@
         d (db c)]
     ;; nil is contained twice, so 19 statements, rather than the 20 inserted
     (is (= 19 (count tx-data)))
-    (is (= 2 (count (filter #(and (= :tg/first (nth % 1)) (= :tg/nil (nth % 2))) tx-data))))
+    (is (= 2 (count (filter #(and (= :a/first (nth % 1)) (= :a/nil (nth % 2))) tx-data))))
     (is (= {:name  "Home"
             :address nil
             :rooms   ["Room 1" nil "Room 2" nil "Room 3"]}
@@ -353,7 +353,7 @@
     (is (= (set (q '[:find ?name :where [?e :name ?name]] db3))
            #{["Maksim"] ["Anna"]}))
     (is (= (set (q '[:find [?a ...] :where [?e ?a ?v]] db2))
-           #{:db/ident :name :age :aka :tg/entity :tg/contains :tg/first :tg/rest :tg/owns})))
+           #{:db/ident :name :age :aka :a/entity :a/contains :a/first :a/rest :a/owns})))
   (delete-database "asami:local://test5"))
 
 (deftest test-update
@@ -377,7 +377,7 @@
         maks   {:db/ident :maksim
                 :aka' ["Maks Otto von Stirlitz"]}
         {db3 :db-after} @(transact c [maks])]
-    (is (= (set (q '[:find ?aka :where [?e :name "Maksim"] [?e :aka ?a] [?a :tg/contains ?aka]] db1))
+    (is (= (set (q '[:find ?aka :where [?e :name "Maksim"] [?e :aka ?a] [?a :a/contains ?aka]] db1))
            #{["Maks Otto von Stirlitz"] ["Jack Ryan"]}))
     (is (= (set (q '[:find ?age :where [?e :db/ident :anna] [?e :age ?age]] db1))
            #{[31]}))
@@ -387,7 +387,7 @@
            #{[31] [32]}))
     (is (= (set (q '[:find ?name :where [?e :db/ident :anna] [?e :name ?name]] db2))
            #{["Anne"]}))
-    (is (= (set (q '[:find ?aka :where [?e :name "Maksim"] [?e :aka ?a] [?a :tg/contains ?aka]] db3))
+    (is (= (set (q '[:find ?aka :where [?e :name "Maksim"] [?e :aka ?a] [?a :a/contains ?aka]] db3))
            #{["Maks Otto von Stirlitz"]})))
   (delete-database "asami:local://test6"))
 
@@ -412,9 +412,9 @@
         maks   {:db/ident [:maksim 45]
                 :aka' ["Maks Otto von Stirlitz"]}
         {db3 :db-after} @(transact c [maks])]
-    (is (= (set (q '[:find ?aka :where [?e :name "Maksim"] [?e :aka ?a] [?a :tg/contains ?aka]] db1))
+    (is (= (set (q '[:find ?aka :where [?e :name "Maksim"] [?e :aka ?a] [?a :a/contains ?aka]] db1))
            #{["Maks Otto von Stirlitz"] ["Jack Ryan"]}))
-    (is (= (set (q '[:find ?aka :where [?e :db/ident [:maksim 45]] [?e :aka ?a] [?a :tg/contains ?aka]] db1))
+    (is (= (set (q '[:find ?aka :where [?e :db/ident [:maksim 45]] [?e :aka ?a] [?a :a/contains ?aka]] db1))
            #{["Maks Otto von Stirlitz"] ["Jack Ryan"]}))
     (is (= (set (q '[:find ?age :where [?e :db/ident :anna] [?e :age ?age]] db1))
            #{[31]}))
@@ -424,7 +424,7 @@
            #{[31] [32]}))
     (is (= (set (q '[:find ?name :where [?e :db/ident :anna] [?e :name ?name]] db2))
            #{["Anne"]}))
-    (is (= (set (q '[:find ?aka :where [?e :db/ident [:maksim 45]] [?e :aka ?a] [?a :tg/contains ?aka]] db3))
+    (is (= (set (q '[:find ?aka :where [?e :db/ident [:maksim 45]] [?e :aka ?a] [?a :a/contains ?aka]] db3))
            #{["Maks Otto von Stirlitz"]})))
   (delete-database "asami:local://test6s"))
 
@@ -447,18 +447,18 @@
                 :age   32
                 :friend+ "Peter"}
         {db2 :db-after :as tx2} @(transact c [anne])]
-    (is (= (set (q '[:find ?aka :where [?e :name "Anna"] [?e :aka ?a] [?a :tg/contains ?aka]] db1))
+    (is (= (set (q '[:find ?aka :where [?e :name "Anna"] [?e :aka ?a] [?a :a/contains ?aka]] db1))
            #{["Anitzka"] ["Annie"]}))
     (is (= (set (q '[:find ?age :where [?e :db/ident :anna] [?e :age ?age]] db1))
            #{[31]}))
     (is (= {:name "Anna" :age 31 :aka ["Anitzka" "Annie"] :husband {:db/ident :maksim}}
            (entity db1 :anna)))
 
-    (is (= (set (q '[:find ?aka :where [?e :name "Anna"] [?e :aka ?a] [?a :tg/contains ?aka]] db2))
+    (is (= (set (q '[:find ?aka :where [?e :name "Anna"] [?e :aka ?a] [?a :a/contains ?aka]] db2))
            #{["Anitzka"] ["Annie"] ["Anne"]}))
     (is (= (set (q '[:find ?age :where [?e :db/ident :anna] [?e :age ?age]] db2))
            #{[31] [32]}))
-    (is (= (set (q '[:find ?friend :where [?e :name "Anna"] [?e :friend ?f] [?f :tg/contains ?friend]] db2))
+    (is (= (set (q '[:find ?friend :where [?e :name "Anna"] [?e :friend ?f] [?f :a/contains ?friend]] db2))
            #{["Peter"]}))
     (is (= {:name "Anna" :age #{31 32} :aka ["Anitzka" "Annie" "Anne"] :friend ["Peter"] :husband {:db/ident :maksim}}
            (entity db2 :anna))))
@@ -504,7 +504,7 @@
                        :where
                        [?parent :address ?address]
                        [?parent :children ?children]
-                       [?children :tg/contains ?child]] (db c)))
+                       [?children :a/contains ?child]] (db c)))
              #{["1313 Mockingbird Lane" 5] ["742 Evergreen Terrace" 2]})))
     (delete-database "asami:local://test-aggregate")))
 
@@ -556,8 +556,8 @@
              [:db/ident ea]
              [:name "Earth"]      
              [:name ea]
-             [:tg/entity true]
-             [:tg/entity ea]}))
+             [:a/entity true]
+             [:a/entity ea]}))
     (is (= (set (q {:find '[?a ?v] :where [[ea '?a+ '?v]]} d))
            #{[:is-in "Solar System"]
              [:is-in "Orion-Cygnus Arm"]
@@ -568,7 +568,7 @@
              [:is-in true]
              [:db/ident "earth"]
              [:name "Earth"]      
-             [:tg/entity true]}))
+             [:a/entity true]}))
     (is (= (set (q {:find '[?e ?a] :where [['?e '?a* ea]]} d))
            #{[us :is-in]
              [wd :is-in]
@@ -716,31 +716,31 @@
     (delete-database "asami:local://test11")))
 
 (def raw-data
-  [[:tg/node-10511 :db/ident "charles"]
-   [:tg/node-10511 :tg/entity true]
-   [:tg/node-10511 :name "Charles"]
-   [:tg/node-10511 :home :tg/node-10512]
-   [:tg/node-10512 :db/ident "scarborough"]
-   [:tg/node-10512 :town "Scarborough"]
-   [:tg/node-10512 :county "Yorkshire"]
-   [:tg/node-10513 :db/ident "jane"]
-   [:tg/node-10513 :tg/entity true]
-   [:tg/node-10513 :name "Jane"]
-   [:tg/node-10513 :home :tg/node-10512]])
+  [[:a/node-10511 :db/ident "charles"]
+   [:a/node-10511 :a/entity true]
+   [:a/node-10511 :name "Charles"]
+   [:a/node-10511 :home :a/node-10512]
+   [:a/node-10512 :db/ident "scarborough"]
+   [:a/node-10512 :town "Scarborough"]
+   [:a/node-10512 :county "Yorkshire"]
+   [:a/node-10513 :db/ident "jane"]
+   [:a/node-10513 :a/entity true]
+   [:a/node-10513 :name "Jane"]
+   [:a/node-10513 :home :a/node-10512]])
 
 (deftest test-import-export
   (testing "Loading raw data"
     (let [conn (connect "asami:local://test12")
           {d :db-after} @(import-data conn raw-data)]
-      (is (= #{[:tg/node-10511 "Charles"]
-               [:tg/node-10513 "Jane"]}
+      (is (= #{[:a/node-10511 "Charles"]
+               [:a/node-10513 "Jane"]}
              (set (q '[:find ?e ?n :where [?e :name ?n]] d))))
       (is (= (set raw-data)
              (set (export-data (db conn))))))
     (let [conn (connect "asami:local://test13")
           {d :db-after} @(import-data conn (str raw-data))]
-      (is (= #{[:tg/node-10511 "Charles"]
-               [:tg/node-10513 "Jane"]}
+      (is (= #{[:a/node-10511 "Charles"]
+               [:a/node-10513 "Jane"]}
              (set (q '[:find ?e ?n :where [?e :name ?n]] d))))
       (is (= (set raw-data)
              (set (export-data (db conn))))))

@@ -308,7 +308,7 @@
 (defn q
   "Execute a query against the provided inputs.
    The query can be a map, a seq, or a string.
-   See the documentation at https://github.com/threatgrid/asami/wiki/Querying
+   See the documentation at https://github.com/quoll/asami/wiki/6.-Querying
    for a full description of queries.
    The end of the parameters may include a series of key/value pairs for query options.
    The only recognized option for now is:

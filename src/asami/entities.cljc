@@ -96,7 +96,7 @@
                   ;; find what should be the heads of lists, removing any that aren't list heads
                   attr-heads (->> entity-av-pairs
                                   (filter (comp append-attrs first))
-                                  (filter #(seq (gr/resolve-triple graph (second %) :tg/first '?v))))
+                                  (filter #(seq (gr/resolve-triple graph (second %) :a/first '?v))))
                   ;; find any appending attributes that are not in use. These are new arrays
                   remaining-attrs (reduce (fn [attrs [k v]] (disj attrs k)) append-attrs attr-heads)
                   ;; reassociate the object with any attributes that are for new arrays, making it a singleton array
@@ -104,14 +104,14 @@
                   new-obj (reduce (fn [o a] (assoc o a [(obj (append->annotate a))])) clean-obj remaining-attrs)
                   ;; find tails function
                   find-tail (fn [node]
-                              (if-let [n (ffirst (gr/resolve-triple graph node :tg/rest '?r))]
+                              (if-let [n (ffirst (gr/resolve-triple graph node :a/rest '?r))]
                                 (recur n)
                                 node))
                   ;; create appending triples
                   append-triples (mapcat (fn [[attr head]]
                                            (let [v (obj (append->annotate attr))
                                                  new-node (node/new-node graph)]
-                                             [[(find-tail head) :tg/rest new-node] [new-node :tg/first v] [head :tg/contains v]])) attr-heads)]
+                                             [[(find-tail head) :a/rest new-node] [new-node :a/first v] [head :a/contains v]])) attr-heads)]
               (if (and limit (> (count append-triples) limit))
                 (throw (ex-info "Limit reached" {:overflow true}))
                 [new-obj removals append-triples])))
@@ -125,7 +125,7 @@
 
         ;; if updates occurred new entity statements are redundant
         triples (if (or (seq removals) (seq additions) (not (identical? obj new-obj)))
-                  (remove #(= :tg/entity (second %)) triples)
+                  (remove #(= :a/entity (second %)) triples)
                   triples)]
     [(concat triples additions) removals ids new-top-ids]))
 

@@ -51,49 +51,49 @@
                                    "    [\"nested\"]"
                                    "]}]"))]
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]} m1))
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]
              [:test/n1 :p2 2]} m2))
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]
              [:test/n1 :p2 22]
              [:test/n1 :p3 :test/n2]
-             [:test/n1 :tg/owns :test/n2]
-             [:test/n2 :tg/first 42]
-             [:test/n2 :tg/rest :test/n3]
-             [:test/n3 :tg/first 54]
-             [:test/n2 :tg/contains 42]
-             [:test/n2 :tg/contains 54]} m3))
+             [:test/n1 :a/owns :test/n2]
+             [:test/n2 :a/first 42]
+             [:test/n2 :a/rest :test/n3]
+             [:test/n3 :a/first 54]
+             [:test/n2 :a/contains 42]
+             [:test/n2 :a/contains 54]} m3))
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]
              [:test/n2 :db/ident :test/n2]
-             [:test/n2 :tg/entity true]
+             [:test/n2 :a/entity true]
              [:test/n2 :prop "val2"]} m4))
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]
              [:test/n1 :arr :test/n2]
-             [:test/n1 :tg/owns :test/n2]
-             [:test/n2 :tg/first :test/n3]
-             [:test/n2 :tg/rest :test/n4]
+             [:test/n1 :a/owns :test/n2]
+             [:test/n2 :a/first :test/n3]
+             [:test/n2 :a/rest :test/n4]
              [:test/n3 :a 1]
-             [:test/n1 :tg/owns :test/n3]
-             [:test/n4 :tg/first :test/n5]
-             [:test/n4 :tg/rest :test/n6]
+             [:test/n1 :a/owns :test/n3]
+             [:test/n4 :a/first :test/n5]
+             [:test/n4 :a/rest :test/n6]
              [:test/n5 :a 2]
-             [:test/n1 :tg/owns :test/n5]
-             [:test/n6 :tg/first :test/n7]
-             [:test/n1 :tg/owns :test/n7]
-             [:test/n7 :tg/first "nested"]
-             [:test/n7 :tg/contains "nested"]
-             [:test/n2 :tg/contains :test/n3]
-             [:test/n2 :tg/contains :test/n5]
-             [:test/n2 :tg/contains :test/n7]} m5))))
+             [:test/n1 :a/owns :test/n5]
+             [:test/n6 :a/first :test/n7]
+             [:test/n1 :a/owns :test/n7]
+             [:test/n7 :a/first "nested"]
+             [:test/n7 :a/contains "nested"]
+             [:test/n2 :a/contains :test/n3]
+             [:test/n2 :a/contains :test/n5]
+             [:test/n2 :a/contains :test/n7]} m5))))
 
 (defn entities->graph [coll]
   (set (entities->triples (test-helper/new-graph) coll)))
@@ -107,54 +107,54 @@
                               :arr [{:a 1} {:a 2} ["nested"]]}])
         m6 (entities->graph [{:prop "val", :p2 22, :p3 []}])]
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]} m1))
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]
              [:test/n1 :p2 2]} m2))
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]
              [:test/n1 :p2 22]
              [:test/n1 :p3 :test/n2]
-             [:test/n1 :tg/owns :test/n2]
-             [:test/n2 :tg/first 42]
-             [:test/n2 :tg/rest :test/n3]
-             [:test/n3 :tg/first 54]
-             [:test/n2 :tg/contains 42]
-             [:test/n2 :tg/contains 54]} m3))
+             [:test/n1 :a/owns :test/n2]
+             [:test/n2 :a/first 42]
+             [:test/n2 :a/rest :test/n3]
+             [:test/n3 :a/first 54]
+             [:test/n2 :a/contains 42]
+             [:test/n2 :a/contains 54]} m3))
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]
              [:test/n2 :db/ident :test/n2]
-             [:test/n2 :tg/entity true]
+             [:test/n2 :a/entity true]
              [:test/n2 :prop "val2"]} m4))
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]
              [:test/n1 :arr :test/n2]
-             [:test/n1 :tg/owns :test/n2]
-             [:test/n2 :tg/first :test/n3]
-             [:test/n1 :tg/owns :test/n3]
-             [:test/n2 :tg/rest :test/n4]
+             [:test/n1 :a/owns :test/n2]
+             [:test/n2 :a/first :test/n3]
+             [:test/n1 :a/owns :test/n3]
+             [:test/n2 :a/rest :test/n4]
              [:test/n3 :a 1]
-             [:test/n4 :tg/first :test/n5]
-             [:test/n1 :tg/owns :test/n5]
-             [:test/n4 :tg/rest :test/n6]
+             [:test/n4 :a/first :test/n5]
+             [:test/n1 :a/owns :test/n5]
+             [:test/n4 :a/rest :test/n6]
              [:test/n5 :a 2]
-             [:test/n6 :tg/first :test/n7]
-             [:test/n1 :tg/owns :test/n7]
-             [:test/n7 :tg/first "nested"]
-             [:test/n7 :tg/contains "nested"]
-             [:test/n2 :tg/contains :test/n3]
-             [:test/n2 :tg/contains :test/n5]
-             [:test/n2 :tg/contains :test/n7]} m5))
+             [:test/n6 :a/first :test/n7]
+             [:test/n1 :a/owns :test/n7]
+             [:test/n7 :a/first "nested"]
+             [:test/n7 :a/contains "nested"]
+             [:test/n2 :a/contains :test/n3]
+             [:test/n2 :a/contains :test/n5]
+             [:test/n2 :a/contains :test/n7]} m5))
     (is (= #{[:test/n1 :db/ident :test/n1]
-             [:test/n1 :tg/entity true]
+             [:test/n1 :a/entity true]
              [:test/n1 :prop "val"]
              [:test/n1 :p2 22]
-             [:test/n1 :p3 :tg/empty-list]} m6))))
+             [:test/n1 :p3 :a/empty-list]} m6))))
 
 (defn round-trip
   [data]
@@ -338,79 +338,79 @@
           [triples3 map3] (ident-map->graph data3)
           node2 (get map3 -1)
           data4 {:db/id -1 :prop "value" :attribute 2}
-          [triples4 map4] (ident-map->graph data4 {-1 :tg/node-101})
+          [triples4 map4] (ident-map->graph data4 {-1 :a/node-101})
           data5 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
           [triples5 map5] (ident-map->graph data5)
           node3 (get map5 -1)
           data6 {:db/id -1 :prop "value" :attribute 2 :sub {:db/id -1}}
-          [triples6 map6] (ident-map->graph data6 {-1 :tg/node-101})
+          [triples6 map6] (ident-map->graph data6 {-1 :a/node-101})
           data7 {:db/id -1 :prop "value" :sub {:db/id -2} :elts [{:name "one"} {:db/id -2 :name "two"}]}
           [triples7 map7] (ident-map->graph data7)
           node4 (get map7 -1)
           node5 (get map7 -2)
           node6 (->> triples7 (filter #(= :elts (second %))) first last)
           node7 (->> triples7 (filter #(and (= :name (second %)) (= "one" (nth % 2)))) ffirst)
-          node8 (->> triples7 (filter #(= :tg/rest (second %))) first last)
+          node8 (->> triples7 (filter #(= :a/rest (second %))) first last)
           data8 {:db/id -1 :prop #{"value1" "value2"} :attribute 2}
           [triples8 map8] (ident-map->graph data8)
           node9 (get map8 -1)]
       (is (= {"1234" node1} map1))
       (is (= #{[node1 :db/ident node1]
-               [node1 :tg/entity true]
+               [node1 :a/entity true]
                [node1 :id "1234"]
                [node1 :prop "value"]
                [node1 :attribute 2]}
              triples1))
       (is (empty? map2))
       (is (= #{[node1 :db/ident node1]
-               [node1 :tg/entity true]
+               [node1 :a/entity true]
                [node1 :prop "value"]
                [node1 :attribute 2]}
              triples2))
       (is (= #{[node2 :db/ident node2]
-               [node2 :tg/entity true]
+               [node2 :a/entity true]
                [node2 :prop "value"]
                [node2 :attribute 2]}
              triples3))
-      (is (= {-1 :tg/node-101} map4))
-      (is (= #{[:tg/node-101 :db/ident :tg/node-101]
-               [:tg/node-101 :tg/entity true]
-               [:tg/node-101 :prop "value"]
-               [:tg/node-101 :attribute 2]}
+      (is (= {-1 :a/node-101} map4))
+      (is (= #{[:a/node-101 :db/ident :a/node-101]
+               [:a/node-101 :a/entity true]
+               [:a/node-101 :prop "value"]
+               [:a/node-101 :attribute 2]}
              triples4))
       (is (= {-1 node3} map5))
       (is (= #{[node3 :db/ident node3]
-               [node3 :tg/entity true]
+               [node3 :a/entity true]
                [node3 :prop "value"]
                [node3 :attribute 2]
                [node3 :sub node3]}
              triples5))
-      (is (= {-1 :tg/node-101} map6))
-      (is (= #{[:tg/node-101 :db/ident :tg/node-101]
-               [:tg/node-101 :tg/entity true]
-               [:tg/node-101 :prop "value"]
-               [:tg/node-101 :attribute 2]
-               [:tg/node-101 :sub :tg/node-101]}
+      (is (= {-1 :a/node-101} map6))
+      (is (= #{[:a/node-101 :db/ident :a/node-101]
+               [:a/node-101 :a/entity true]
+               [:a/node-101 :prop "value"]
+               [:a/node-101 :attribute 2]
+               [:a/node-101 :sub :a/node-101]}
              triples6))
       (is (= {-1 node4 -2 node5} map7))
       (is (= #{[node4 :db/ident node4]
-               [node4 :tg/entity true]
+               [node4 :a/entity true]
                [node4 :prop "value"]
                [node4 :sub node5]
-               [node4 :tg/owns node5]
+               [node4 :a/owns node5]
                [node4 :elts node6]
-               [node4 :tg/owns node6]
-               [node6 :tg/first node7]
-               [node6 :tg/rest node8]
-               [node4 :tg/owns node7]
+               [node4 :a/owns node6]
+               [node6 :a/first node7]
+               [node6 :a/rest node8]
+               [node4 :a/owns node7]
                [node7 :name "one"]
-               [node8 :tg/first node5]
+               [node8 :a/first node5]
                [node5 :name "two"]
-               [node6 :tg/contains node7]
-               [node6 :tg/contains node5]}
+               [node6 :a/contains node7]
+               [node6 :a/contains node5]}
              triples7))
       (is (= #{[node9 :db/ident node9]
-               [node9 :tg/entity true]
+               [node9 :a/entity true]
                [node9 :prop "value1"]
                [node9 :prop "value2"]
                [node9 :attribute 2]}
@@ -420,24 +420,24 @@
 #?(:clj
 (deftest test-multi-update
   (let [graph
-        #asami.multi_graph.MultiGraph{:spo #:tg{:node-27367
-                                                {:db/ident #:tg{:node-27367 {:count 1 :t 0 :id 1}},
-                                                 :tg/entity {true {:count 1 :t 0 :id 2}},
+        #asami.multi_graph.MultiGraph{:spo #:a{:node-27367
+                                                {:db/ident #:a{:node-27367 {:count 1 :t 0 :id 1}},
+                                                 :a/entity {true {:count 1 :t 0 :id 2}},
                                                  :value {"01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9" {:count 1 :t 0 :id 3}},
                                                  :type {"sha256" {:count 1 :t 0 :id 4}},
                                                  :id {"4f390192" {:count 1 :t 0 :id 5}}}},
                                       :pos {:db/ident
-                                            #:tg{:node-27367 #:tg{:node-27367 {:count 1 :t 0 :id 1}}},
-                                            :tg/entity {true #:tg{:node-27367 {:count 1 :t 0 :id 2}}},
-                                            :value {"01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9" #:tg{:node-27367 {:count 1 :t 0 :id 3}}},
-                                            :type {"sha256" #:tg{:node-27367 {:count 1 :t 0 :id 4}}},
-                                            :id {"4f390192" #:tg{:node-27367 {:count 1 :t 0 :id 5}}}},
-                                      :osp {:tg/node-27367 #:tg{:node-27367 #:db{:ident {:count 1 :t 0 :id 1}}},
-                                            true #:tg{:node-27367 #:tg{:entity {:count 1 :t 0 :id 2}}},
+                                            #:a{:node-27367 #:a{:node-27367 {:count 1 :t 0 :id 1}}},
+                                            :a/entity {true #:a{:node-27367 {:count 1 :t 0 :id 2}}},
+                                            :value {"01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9" #:a{:node-27367 {:count 1 :t 0 :id 3}}},
+                                            :type {"sha256" #:a{:node-27367 {:count 1 :t 0 :id 4}}},
+                                            :id {"4f390192" #:a{:node-27367 {:count 1 :t 0 :id 5}}}},
+                                      :osp {:a/node-27367 #:a{:node-27367 #:db{:ident {:count 1 :t 0 :id 1}}},
+                                            true #:a{:node-27367 #:a{:entity {:count 1 :t 0 :id 2}}},
                                             "01468b1d3e089985a4ed255b6594d24863cfd94a647329c631e4f4e52759f8a9"
-                                            #:tg{:node-27367 {:value {:count 1 :t 0 :id 3}}},
-                                            "sha256" #:tg{:node-27367 {:type {:count 1 :t 0 :id 4}}},
-                                            "4f390192" #:tg{:node-27367 {:id {:count 1 :t 0 :id 5}}}}
+                                            #:a{:node-27367 {:value {:count 1 :t 0 :id 3}}},
+                                            "sha256" #:a{:node-27367 {:type {:count 1 :t 0 :id 4}}},
+                                            "4f390192" #:a{:node-27367 {:id {:count 1 :t 0 :id 5}}}}
                                       :next-stmt-id 6}
         id "verdict:AMP File Reputation:4f390192"
         m {:type "verdict",

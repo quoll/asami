@@ -139,7 +139,7 @@
               :db/ident
               "p"
               :a
-              :tg/entity
+              :a/entity
               true
               :a
               :name
@@ -150,36 +150,36 @@
               23
               :a
               :friends
-              :tg/node-b
-              :tg/node-b
-              :tg/first
-              :tg/node-1
-              :tg/node-b
-              :tg/rest
-              :tg/node-c
-              :tg/node-c
-              :tg/first
+              :a/node-b
+              :a/node-b
+              :a/first
+              :a/node-1
+              :a/node-b
+              :a/rest
+              :a/node-c
+              :a/node-c
+              :a/first
               {:id 1 :data ["two" 2]}
-              :tg/node-2
-              :tg/node-1
+              :a/node-2
+              :a/node-1
               :name
               "Anastasia Christodoulopoulos"
-              :tg/node-1
+              :a/node-1
               :age
               23
-              :tg/node-2
+              :a/node-2
               :name
               "Anne Richardson"
-              :tg/node-2
+              :a/node-2
               :age
               25
               {:id 2 "data" 2}
-              :tg/node-b
-              :tg/contains
-              :tg/node-1
-              :tg/node-b
-              :tg/contains
-              :tg/node-2]
+              :a/node-b
+              :a/contains
+              :a/node-1
+              :a/node-b
+              :a/contains
+              :a/node-2]
         [ids pool] (reduce (fn [[ids p] d]
                              (let [[id p'] (write! p d)]
                                [(conj ids id) p']))

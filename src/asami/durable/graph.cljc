@@ -158,8 +158,8 @@
        0)))
 
   node/NodeAPI
-  (data-attribute [_ _] :tg/first)
-  (container-attribute [_ _] :tg/contains)
+  (data-attribute [_ _] :a/first)
+  (container-attribute [_ _] :a/contains)
   (new-node [_] (node-allocator))
   (node-id [_ n] (graph/node-id n))
   (node-type? [_ _ n] (graph/node-type? n))

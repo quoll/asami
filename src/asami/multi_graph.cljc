@@ -155,8 +155,8 @@ allow rules to successfully use this graph type."
       (common/count-from-index this subj pred obj)))
   
   NodeAPI
-  (data-attribute [_ _] :tg/first)
-  (container-attribute [_ _] :tg/contains)
+  (data-attribute [_ _] :a/first)
+  (container-attribute [_ _] :a/contains)
   (new-node [_] (gr/new-node))
   (node-id [_ n] (gr/node-id n))
   (node-type? [_ _ n] (gr/node-type? n))

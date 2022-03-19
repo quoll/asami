@@ -1,7 +1,7 @@
 (ns ^{:doc "Reads structured data from a graph."
       :author "Paula Gearon"}
     asami.entities.reader
-  (:require [asami.entities.general :as general :refer [tg-ns KeyValue EntityMap GraphType]]
+  (:require [asami.entities.general :as general :refer [a-ns KeyValue EntityMap GraphType]]
             [zuko.node :as node]
             [schema.core :as s :refer [=>]]
             [clojure.string :as string]))
@@ -11,12 +11,12 @@
 
 (def NodeType s/Any) ;; No checking, but indicates a node in a graph
 
-(defn get-tg-first
-  "Finds the tg/first property in a map, and gets the value."
+(defn get-a-first
+  "Finds the a/first property in a map, and gets the value."
   [struct]
   (let [first-pair? (fn [[k v :as p]]
                       (and (keyword? k)
-                           (= tg-ns (namespace k))
+                           (= a-ns (namespace k))
                            (string/starts-with? (name k) "first")
                            p))]
     (some first-pair? struct)))
@@ -26,7 +26,7 @@
   [graph :- GraphType
    entity :- s/Any]
   (->> (node/find-triple graph [entity '?p '?o])
-       (remove #(= :tg/owns (first %)))))
+       (remove #(= :a/owns (first %)))))
 
 
 (s/defn check-structure :- (s/maybe [KeyValue])
@@ -51,16 +51,16 @@
   ;; convert the data to a map
   (let [st (into {} pairs)]
     ;; if the properties indicate a list, then process it
-    (if-let [first-prop-elt (get-tg-first st)]
-      (let [remaining (:tg/rest st)
+    (if-let [first-prop-elt (get-a-first st)]
+      (let [remaining (:a/rest st)
             [_ first-elt] (recurse-node graph seen first-prop-elt)]
         (assert first-elt)
-        (let [head-elt (if (= :tg/nil first-elt) nil first-elt)]
+        (let [head-elt (if (= :a/nil first-elt) nil first-elt)]
           ;; recursively build the list
           (if remaining
             (cons head-elt (build-list graph seen (property-values graph remaining)))
             (list head-elt))))
-      (when (= :tg/list (:tg/type st)) []))))
+      (when (= :a/list (:a/type st)) []))))
 
 (s/defn vbuild-list :- [s/Any]
   "Calls build-list, converting to a vector as the final step"
@@ -80,14 +80,14 @@
    [prop v :as prop-val] :- KeyValue]
   (if-let [pairs (check-structure graph prop v)]
     (if (or (seen v)
-            (and (not *nested-structs*) (some #(= :tg/entity (first %)) pairs)))
+            (and (not *nested-structs*) (some #(= :a/entity (first %)) pairs)))
       [prop (if-let [[idd ident] (some (fn [[k v]] (if (#{:db/ident :id} k) [k v])) pairs)]
               {idd ident}
               {:db/id v})]
       (let [next-seen (conj seen v)]
         [prop (or (vbuild-list graph next-seen pairs)
                   (pairs->struct graph pairs next-seen))]))
-    (if (= :tg/empty-list v)
+    (if (= :a/empty-list v)
       [prop []]
       prop-val)))
 
@@ -123,12 +123,12 @@
   ([graph :- GraphType
     prop-vals :- [KeyValue]
     seen :- #{NodeType}]
-   (if (some (fn [[k _]] (= :tg/first k)) prop-vals)
+   (if (some (fn [[k _]] (= :a/first k)) prop-vals)
      (vbuild-list graph seen prop-vals)
      (into-multimap
       (comp
-       (remove (comp #{:db/id :db/ident :tg/entity} first)) ;; INTERNAL PROPERTIES
-       (map (fn [[a v :as av]] (if (= :tg/nil v) [a nil] av)))
+       (remove (comp #{:db/id :db/ident :a/entity} first)) ;; INTERNAL PROPERTIES
+       (map (fn [[a v :as av]] (if (= :a/nil v) [a nil] av)))
        (map (partial recurse-node graph seen))
        (map (fn [[a v :as av]] (if (seq? v) [a (vec v)] av))))
       prop-vals))))
@@ -182,6 +182,6 @@
   ([graph :- GraphType
     nested? :- s/Bool
     exclusions :- (s/maybe #{s/Keyword})]
-   (->> (node/find-triple graph '[?e :tg/entity true])
+   (->> (node/find-triple graph '[?e :a/entity true])
         (map first)
         (map #(ref->entity graph % nested? exclusions)))))
