@@ -1,10 +1,12 @@
-# asami [![Build Status](https://travis-ci.org/threatgrid/asami.svg?branch=main)](https://travis-ci.org/threatgrid/asami) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+# asami [![Build Status](https://travis-ci.org/quoll/asami.svg?branch=main)](https://travis-ci.org/quoll/asami) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 A graph database, for Clojure and ClojureScript.
 
 The latest version is :
 
 [![Clojars Project](http://clojars.org/org.clojars.quoll/asami/latest-version.svg)](http://clojars.org/org.clojars.quoll/asami)
+
+_Asami is now being developed in this repository, as it is no longer being supported at Cisco. The deployment to Clojars has not changed, as it was always to my personal account._
 
 ## Goals
 Asami is both similar to and different from other graph databases. Some of the goals of the project are:
@@ -19,9 +21,9 @@ Asami is a _schemaless_ database, meaning that data may be inserted with no pred
 
 Asami also follows an _Open World Assumption_ model, in the same way that [RDF](http://www.w3.org/TR/rdf-primer) does. In practice, this has very little effect on the database, beyond what being schemaless provides.
 
-If you are new to graph databases, then please read our [Introduction page](https://github.com/threatgrid/asami/wiki/2.-Introduction).
+If you are new to graph databases, then please read our [Introduction page](https://github.com/quoll/asami/wiki/2.-Introduction).
 
-Asami has a query API that looks very similar to a simplified Datomic. More details are available in the [Query documentation](https://github.com/threatgrid/asami/wiki/6.-Querying).
+Asami has a query API that looks very similar to a simplified Datomic. More details are available in the [Query documentation](https://github.com/quoll/asami/wiki/6.-Querying).
 
 ## Features
 There are several other graph databases available in the Clojure ecosystem, with each having their own focus. Asami is characterized by the following:
@@ -29,7 +31,7 @@ There are several other graph databases available in the Clojure ecosystem, with
 - Schema-less: Asami does not require a schema to insert data.
 - Query planner: Queries are analyzed to find an efficient execution plan. This can be turned off.
 - Analytics: Supports fast graph traversal operations, such as transitive closures, and can identify subgraphs.
-- Integrated with Loom: Asami graphs are valid Loom graphs, via [Asami-Loom](https://github.com/threatgrid/asami-loom).
+- Integrated with Loom: Asami graphs are valid Loom graphs, via [Asami-Loom](https://github.com/quoll/asami-loom).
 - Open World Assumption: Related to being schema-less, Asami borrows semantics from [RDF](http://www.w3.org/TR/rdf-primer) to lean towards an open world model.
 - Pluggable Storage: Like Datomic, storage in Asami can be implemented in multiple ways. There are currently 2 in-memory graph systems, and durable storage available on the JVM.
 
@@ -57,7 +59,7 @@ Alternatively, Asami can be added for the Leiningen build tool by adding this to
 Asami 2.1.0 now uses fewer files to manage data. This makes it incompatible with previous versions. To port data from an older store to a new one, use the `asami.core/export-data` function on a database on the previous version of Asami, and `asami.core/import-data` to load the data into a new connection.
 
 ### Running
-The [Asami API](https://github.com/threatgrid/asami/wiki/7.-Asami-API) tries to look a little like Datomic.
+The [Asami API](https://github.com/quoll/asami/wiki/7.-Asami-API) tries to look a little like Datomic.
 
 Once a repl has been configured for Asami, the following can be copy/pasted to test the API:
 ```clojure
@@ -86,9 +88,9 @@ Once a repl has been configured for Asami, the following can be copy/pasted to t
 
 @(d/transact conn {:tx-data first-movies})
 ```
-The [`transact`](https://github.com/threatgrid/asami/wiki/7.-Asami-API#transact) operation returns an object that can be _dereferenced_ (via `clojure.core/deref` or the `@` macro) to provide information about the state of the database before and after the transaction. (A _future_ in Clojure, or a _delay_ in ClojureScript). Note that the transaction data can be provided as the `:tx-data` in a map object if other parameters are to be provided, or just as a raw sequence without the wrapping map.
+The [`transact`](https://github.com/quoll/asami/wiki/7.-Asami-API#transact) operation returns an object that can be _dereferenced_ (via `clojure.core/deref` or the `@` macro) to provide information about the state of the database before and after the transaction. (A _future_ in Clojure, or a _delay_ in ClojureScript). Note that the transaction data can be provided as the `:tx-data` in a map object if other parameters are to be provided, or just as a raw sequence without the wrapping map.
 
-For more information about loading data and executing `transact` see the [Transactions documentation](https://github.com/threatgrid/asami/wiki/4.-Transactions).
+For more information about loading data and executing `transact` see the [Transactions documentation](https://github.com/quoll/asami/wiki/4.-Transactions).
 
 With the data loaded, a database value can be retrieved from the database and then queried.
 
@@ -115,7 +117,7 @@ A more complex query could be to get the title, year and genre for all movies af
               [?m :movie/genre ?genre]
               [(> ?year 1990)]] db)
 ```
-Entities found in a query can be extracted back out as objects using the [`entity`](https://github.com/threatgrid/asami/wiki/7.-Asami-API#entity) function. For instance, the following is a repl session that looks up the movies released in 1995, and then gets the associated entities:
+Entities found in a query can be extracted back out as objects using the [`entity`](https://github.com/quoll/asami/wiki/7.-Asami-API#entity) function. For instance, the following is a repl session that looks up the movies released in 1995, and then gets the associated entities:
 ```clojure
 ;; find the entity IDs. This variation in the :find clause asks for a list of just the ?m variable
 => (d/q '[:find [?m ...] :where [?m :movie/release-year 1995]] db)
@@ -137,9 +139,9 @@ Entities found in a query can be extracted back out as objects using the [`entit
          :genre "cyber-punk/action",
          :release-year 1995})
 ```
-See the [Query Documentation](https://github.com/threatgrid/asami/wiki/6.-Querying) for more information on querying.
+See the [Query Documentation](https://github.com/quoll/asami/wiki/6.-Querying) for more information on querying.
 
-Refer to the [Entity Structure documentation](https://github.com/threatgrid/asami/wiki/5.-Entity-Structure) to understand how entities are stored and how to construct queries for them.
+Refer to the [Entity Structure documentation](https://github.com/quoll/asami/wiki/5.-Entity-Structure) to understand how entities are stored and how to construct queries for them.
 
 ### Local Storage
 The above code uses an in-memory database, specified with a URL of the form `asami:mem://dbname`. Creating a database on disk is done the same way, but with the URL scheme changed to `asami:local://dbname`. This would create a database in the `dbname` directory. Local databases do not use keywords as entity IDs, as keywords use up memory, and a local database could be gigabytes in size. Instead, these are `InternalNode` objects. These can be created with `asami.graph/new-node`, or by using the readers in `asami.graph`. For instance, if the above code were all done with a local graph instead of a memory graph:
@@ -194,7 +196,7 @@ The release year of this movie is incorrectly set to the release in the USA, and
 => (d/entity (d/db conn) sense)
 #:movie{:title "Sense and Sensibility", :genre "drama/romance", :release-year 1995}
 ```
-More details are provided in [Entity Updates](https://github.com/threatgrid/asami/wiki/4.-Transactions#entity-updates).
+More details are provided in [Entity Updates](https://github.com/quoll/asami/wiki/4.-Transactions#entity-updates).
 
 ## Analytics
 Asami also has some support for graph analytics. These all operate on the _graph_ part of a database value, which can be retrieved with the `asami.core/graph` function.
@@ -274,7 +276,7 @@ Asami supports transitive properties in queries. A property (or attribute) is tr
 This will find all friends, and friends of friends for Fred.
 
 ### Loom
-Asami also implements [Loom](https://github.com/aysylu/loom) via the [Asami-Loom](https://github.com/threatgrid/asami-loom) package.
+Asami also implements [Loom](https://github.com/aysylu/loom) via the [Asami-Loom](https://github.com/quoll/asami-loom) package.
 Include the following dependency for your project:
 ```
 [org.clojars.quoll/asami-loom "0.2.0"]
