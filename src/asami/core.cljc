@@ -193,12 +193,14 @@
   :tx-data      sequence of datoms produced by the transaction
   :tempids      mapping of the temporary IDs in entities to the allocated nodes"
   [{:keys [name state] :as connection} :- ConnectionType
-   {:keys [tx-data tx-triples executor update-fn input-limit] :as tx-info} :- TransactData]
+   tx-info :- TransactData]
 
   ;; Detached databases need to be reattached when transacted into
   (check-attachment connection)
 
-  (let [op (if update-fn
+  ;; destructure tx-info, if it can be destructured
+  (let [{:keys [tx-data tx-triples executor update-fn input-limit]} (if (map? tx-info) tx-info {})
+        op (if update-fn
              (fn []
                (let [[db-before db-after] (storage/transact-update connection update-fn)]
                  {:db-before db-before

@@ -1,5 +1,12 @@
 # Change Log
 
+## [2.3.0] - 2022-03-20
+### Changed
+- All keywords in the `tg` namespace have been updated to use the `a` namespace. This keeps them short, and makes more sense for the project, which no longer has anything to do with "ThreatGrid".
+
+### Fixed
+- Passing seqs directly to transactions will no longer cause errors.
+
 ## [2.2.4] - 2022-02-22
 ### Added
 - The `:db/ident` and `:id` attributes may now use compound keys.
