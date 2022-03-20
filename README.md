@@ -8,6 +8,8 @@ The latest version is :
 
 _Asami is now being developed in this repository, as it is no longer being supported at Cisco. The deployment to Clojars has not changed, as it was always to my personal account._
 
+*Note:* _All references to the `:tg/` namespace for keywords have been changed to `:a/` as of 2.3.0. The documentation will be gradually brought up to date to reflect this._
+
 ## Goals
 Asami is both similar to and different from other graph databases. Some of the goals of the project are:
 - **Schema-less data**. Data can be loaded without prior knowledge of its structures.
