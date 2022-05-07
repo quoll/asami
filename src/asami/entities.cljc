@@ -174,11 +174,21 @@
                                (if-let [overflow (:overflow (ex-data e))]
                                  (reduced last-result)
                                  (throw e))))
-                           (if (and (seqable? obj)
+                           (if (and (seqable? obj)          ; would it be ok performance-wise to turn this into if-let with destructuring to extract e a v to use below instead of (nth ...)?
                                     (= 4 (count obj))
                                     (= :db/add (first obj)))
                              (or
-                              (when (= (nth obj 2) :db/id)
+                               ;; Ex.: `[:db/add [:id X] :id X]` that creates a new entity
+                               (when-let [ref (and (writer/lookup-ref? (nth obj 1))
+                                                   (= (first (nth obj 1)) (nth obj 2))
+                                                   (nth obj 1))]
+                                 (let [new-id (or #_(ids ref) (node/new-node graph))] ; I cannot see where `(ids ref)` would be non-nil in any well-formed tx
+                                   [(conj acc (assoc (vec-rest obj) 0 new-id))
+                                    racc
+                                    (assoc ids ref new-id)
+                                    top-ids]))
+                               ;; Ex.: [:db/add -1 :db/id -1]
+                               (when (= (nth obj 2) :db/id)
                                 (let [id (nth obj 3)]
                                   (when (temp-id? id)
                                     (let [new-id (or (ids id) (node/new-node graph))]
@@ -186,8 +196,10 @@
                                        racc
                                        (assoc ids (or id new-id) new-id)
                                        top-ids]))))
-                              [(conj acc (mapv #(or (ids %) (ref->id %)) (rest obj))) racc ids top-ids])
+                              (let [triple (mapv #(or (ids %) (ref->id %)) (rest obj))]
+                                [(conj acc triple) racc ids top-ids]))
                              (throw (ex-info (str "Bad data in transaction: " obj) {:data obj}))))))
          [triples rtriples id-map top-level-ids] (reduce add-triples [[] retractions {} #{}] new-data)
          triples (writer/backtrack-unlink-top-entities top-level-ids triples)]
      [triples rtriples id-map])))
+

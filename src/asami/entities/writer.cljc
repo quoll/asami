@@ -82,7 +82,7 @@
 (defn lookup-ref?
   "Tests if i is a lookup ref"
   [i]
-  (and (vector? i) (keyword? (first i)) (= 2 (count i))))
+  (and (vector? i) (= 2 (count i)) (#{:db/id :db/ident :id} (first i))))
 
 (defn resolve-ref
   [[prop id]]
