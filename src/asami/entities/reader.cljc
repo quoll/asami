@@ -88,9 +88,10 @@
       (let [next-seen (conj seen v)]
         [prop (or (vbuild-list graph next-seen pairs)
                   (pairs->struct graph pairs next-seen))]))
-    (if (= :a/empty-list v)
-      [prop []]
-      prop-val)))
+    (cond
+      (= :a/empty-list v) [prop []]
+      (node/node-type? graph prop v) [prop {}]
+      :default prop-val)))
 
 
 (s/defn into-multimap
