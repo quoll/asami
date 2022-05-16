@@ -35,9 +35,9 @@
   [graph :- GraphType
    prop :- s/Any
    v :- s/Any]
-  (when (and (not (#{:db/ident :db/id} prop)) (node/node-type? graph prop v))
-    (let [data (property-values graph v)]
-      data)))
+  (when (and (not (#{:db/ident :db/id} prop))
+             (node/broad-node-type? graph prop v))
+    (seq (property-values graph v))))
 
 
 (declare pairs->struct recurse-node)
