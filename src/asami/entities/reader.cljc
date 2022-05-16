@@ -3,6 +3,7 @@
     asami.entities.reader
   (:require [asami.entities.general :as general :refer [a-ns KeyValue EntityMap GraphType]]
             [zuko.node :as node]
+            [asami.graph :as graph]
             [schema.core :as s :refer [=>]]
             [clojure.string :as string]))
 
@@ -36,7 +37,7 @@
    prop :- s/Any
    v :- s/Any]
   (when (and (not (#{:db/ident :db/id} prop))
-             (node/broad-node-type? graph prop v))
+             (graph/broad-node-type? v))
     (seq (property-values graph v))))
 
 
