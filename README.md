@@ -2,7 +2,7 @@
 
 A graph database, for Clojure and ClojureScript.
 
-The latest version is :
+The latest version is:
 
 [![Clojars Project](http://clojars.org/org.clojars.quoll/asami/latest-version.svg)](http://clojars.org/org.clojars.quoll/asami)
 
