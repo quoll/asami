@@ -27,7 +27,7 @@
   (sequence
    (comp
     (filter (fn [[a b _]] (and (= s a) (= p b))))
-    (map #(subseq % 2 3)))
+    (map #(subvseq % 2 3)))
    data))
 
 (defmethod get-from-index [:v  ? :v]
@@ -35,7 +35,7 @@
   (sequence
    (comp
     (filter (fn [[a _ c]] (and (= s a) (= o c))))
-    (map #(subseq % 1 2)))
+    (map #(subvseq % 1 2)))
    data))
 
 (defmethod get-from-index [:v  ?  ?]
@@ -43,7 +43,7 @@
   (sequence
    (comp
     (filter (fn [[a _ _]] (= a s)))
-    (map #(subseq % 1 3)))
+    (map #(subvseq % 1 3)))
    data))
 
 (defmethod get-from-index [ ? :v :v]
@@ -51,7 +51,7 @@
   (sequence
    (comp
     (filter (fn [[_ b c]] (and (= p b) (= o c))))
-    (map #(subseq % 0 1)))
+    (map #(subvseq % 0 1)))
    data))
 
 (defmethod get-from-index [ ? :v  ?]
@@ -67,12 +67,12 @@
   (sequence
    (comp
     (filter (fn [[_ _ c]] (= c o)))
-    (map #(subseq % 0 2)))
+    (map #(subvseq % 0 2)))
    data))
 
 (defmethod get-from-index [ ?  ?  ?]
   [data s p o]
-  (map #(subseq % 0 3) data))
+  (map #(subvseq % 0 3) data))
 
 (defn exists?
   "Fast lookup for a statement in an index/graph"
