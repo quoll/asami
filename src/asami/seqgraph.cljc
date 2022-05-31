@@ -2,18 +2,11 @@
       :author "Paula Gearon"}
     asami.seqgraph
   (:require [asami.graph :as gr :refer [Graph graph-add graph-delete graph-diff resolve-triple count-triple]]
-            [asami.common-index :as common :refer [? NestedIndex]]
+            [asami.common-index :as common :refer [? NestedIndex subvseq]]
             [asami.analytics :as analytics]
             [zuko.node :refer [NodeAPI]]
             [zuko.logging :as log :include-macros true]
             [schema.core :as s :include-macros true]))
-
-(defn subseq
-  "A subvec wrapper that drops back to sequences when the seq is not a vector"
-  [v a b]
-  (if (vector? v)
-    (subvec v a b)
-    (drop a (take b v))))
 
 (defmulti get-from-index
   "Lookup an index in the graph for the requested data.
@@ -29,7 +22,7 @@
   (sequence
    (comp
     (filter (fn [[a b _]] (and (= s a) (= p b))))
-    (map #(subseq % 2 3)))
+    (map #(subvseq % 2 3)))
    data))
 
 (defmethod get-from-index [:v  ? :v]
@@ -37,7 +30,7 @@
   (sequence
    (comp
     (filter (fn [[a _ c]] (and (= s a) (= o c))))
-    (map #(subseq % 1 2)))
+    (map #(subvseq % 1 2)))
    data))
 
 (defmethod get-from-index [:v  ?  ?]
@@ -45,7 +38,7 @@
   (sequence
    (comp
     (filter (fn [[a _ _]] (= a s)))
-    (map #(subseq % 1 3)))
+    (map #(subvseq % 1 3)))
    data))
 
 (defmethod get-from-index [ ? :v :v]
@@ -53,7 +46,7 @@
   (sequence
    (comp
     (filter (fn [[_ b c]] (and (= p b) (= o c))))
-    (map #(subseq % 0 1)))
+    (map #(subvseq % 0 1)))
    data))
 
 (defmethod get-from-index [ ? :v  ?]
@@ -69,12 +62,12 @@
   (sequence
    (comp
     (filter (fn [[_ _ c]] (= c o)))
-    (map #(subseq % 0 2)))
+    (map #(subvseq % 0 2)))
    data))
 
 (defmethod get-from-index [ ?  ?  ?]
   [data s p o]
-  (map #(subseq % 0 3) data))
+  (map #(subvseq % 0 3) data))
 
 
 (declare empty-graph)

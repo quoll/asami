@@ -149,6 +149,8 @@ allow rules to successfully use this graph type."
     (if-let [[plain-pred trans-tag] (common/check-for-transitive pred)]
       (common/get-transitive-from-index this trans-tag subj plain-pred obj)
       (get-from-multi-index this subj pred obj)))
+  (attribute-values [this node]
+    (get-from-multi-index this node '?a '?v))
   (count-triple [this subj pred obj] ;; This intentionally ignores multi-edges, and is used for Naga
     (if-let [[plain-pred trans-tag] (common/check-for-transitive pred)]
       (count-transitive-from-index this trans-tag subj plain-pred obj)

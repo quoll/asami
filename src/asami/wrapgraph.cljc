@@ -2,10 +2,13 @@
       :author "Paula Gearon"}
     asami.wrapgraph
   (:require [asami.graph :as gr :refer [Graph graph-add graph-delete graph-diff resolve-triple count-triple]]
-            [asami.common-index :as common :refer [? NestedIndex]]
+            [asami.common-index :as common :refer [? NestedIndex subvseq]]
+            [asami.index :as mem]
+            [asami.datom :refer [->Datom]]
             [asami.analytics :as analytics]
             [zuko.node :refer [NodeAPI]]
             [zuko.logging :as log :include-macros true]
+            [clojure.string :as str]
             [schema.core :as s :include-macros true]))
 
 (def ^:const TX-LOGGING "asami.tx.logging")
@@ -84,7 +87,7 @@
 
 (defn graph-subtract
   [a b]
-  (reduce (fn [g [s p o]] (gr/delete g s p o)) a (gr/resolve-triple b ?s ?p ?o)))
+  (reduce (fn [g [s p o]] (gr/graph-delete g s p o)) a (gr/resolve-triple b '?s '?p '?o)))
 
 (defrecord GraphWrapper [addgraph delgraph wrapped-graph tx-logging]
   Graph
@@ -135,7 +138,7 @@
           new-graph-del (reduce (if tx-logging
                                   graph-remove
                                   (fn [acc [s p o]]
-                                    (let [aa (graph-remove acc s p o)]
+                                    (let [aa (graph-remove acc [s p o])]
                                       (when-not (graphs-equiv? aa acc)
                                         (conj! asserts (->Datom s p o tx-id false)))
                                       aa)))
@@ -143,7 +146,7 @@
           new-graph (reduce (if tx-logging
                               graph-add
                               (fn [acc [s p o]]
-                                (let [aa (graph-add acc s p o)]
+                                (let [aa (graph-add acc [s p o])]
                                   (when-not (graphs-equiv? aa acc)
                                     (conj! asserts (->Datom s p o tx-id true)))
                                   aa)))
@@ -155,8 +158,9 @@
       new-graph))
 
   (graph-diff [this other]
-    (if (= other wrappedgraph)
-      (merge-graphs addgraph delgraph)
+    (if (= other wrapped-graph)
+      (let [filtered-addition-graph (reduce graph-delete addgraph (resolve-triple delgraph '?s '?p '?o))]
+        (keys (:spo filtered-addition-graph)))
       (throw (ex-info "Unsupported operation" {:operation :graph-diff}))))
 
   (resolve-triple [this subj pred obj]
@@ -181,12 +185,12 @@
 (defn wrap-graph
   "Wraps a given graph with in-memory operations"
   [existing-graph]
-  (->GraphSeq (mem/new-graph) (mem/new-graph)
-              (get-logging) existing-graph))
+  (->GraphWrapper mem/empty-graph mem/empty-graph
+                  existing-graph (get-logging)))
 
 (defn unwrap-graph
   "Merges a wrapped graph with the in-memory data used to wrap it."
-  [{:keys [addgraph delgraph wrapped-graph tx-logging] :as graph}]
-  (gr/graph-transact wrapped-graph
+  [{:keys [addgraph delgraph wrapped-graph tx-logging] :as graph} tx-id]
+  (gr/graph-transact wrapped-graph tx-id
                      (gr/resolve-triple addgraph '?s '?p '?o)
                      (gr/resolve-triple delgraph '?s '?p '?o)))

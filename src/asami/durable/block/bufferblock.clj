@@ -58,15 +58,15 @@
         arr))
 
     (put-byte! [this offset v]
-      (.put ^ByteBuffer bb (+ byte-offset offset) v)
+      (.put ^ByteBuffer bb ^int (+ byte-offset offset) ^byte v)
       this)
 
     (put-int! [this offset v]
-      (.put ^IntBuffer ib (+ int-offset offset) v)
+      (.put ^IntBuffer ib ^int (+ int-offset offset) ^int v)
       this)
 
     (put-long! [this offset v]
-      (.put ^LongBuffer lb (+ long-offset offset) v)
+      (.put ^LongBuffer lb ^int (+ long-offset offset) ^long v)
       this)
 
     ;; a single writer allows for position/put

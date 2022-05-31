@@ -3,6 +3,7 @@
     asami.entities.reader
   (:require [asami.entities.general :as general :refer [tg-ns KeyValue EntityMap GraphType]]
             [zuko.node :as node]
+            [asami.graph :as graph]
             [schema.core :as s :refer [=>]]
             [clojure.string :as string]))
 
@@ -25,7 +26,7 @@
   "Return all the property/value pairs for a given entity in the store. "
   [graph :- GraphType
    entity :- s/Any]
-  (->> (node/find-triple graph [entity '?p '?o])
+  (->> (graph/attribute-values graph entity)
        (remove #(= :tg/owns (first %)))))
 
 

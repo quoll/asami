@@ -51,11 +51,11 @@
 ;; If an embedded index is pulled out, then this is referred to as edx.
 (defmethod get-from-index [:v :v :v] [{idx :spo} s p o] (if (some-> idx (get s) (get p) (get o) keys) [[]] []))
 (defmethod get-from-index [:v :v  ?] [{idx :spo} s p o] (map vector (some-> idx (get s) (get p) keys)))
-(defmethod get-from-index [:v  ? :v] [{idx :osp} s p o] (map vector (some-> idx (get o) (get s) keys)))
+(defmethod get-from-index [:v  ? :v] [{idx :pos} s p o] (keep (fn [[p os]] (when (some-> os (get o) (get s)) [p])) idx)) ;; emulates osp
 (defmethod get-from-index [:v  ?  ?] [{idx :spo} s p o] (let [edx (idx s)] (for [p (keys edx) o ((comp keys edx) p)] [p o])))
 (defmethod get-from-index [ ? :v :v] [{idx :pos} s p o] (map vector (some-> idx (get p) (get o) keys)))
 (defmethod get-from-index [ ? :v  ?] [{idx :pos} s p o] (let [edx (idx p)] (for [o (keys edx) s ((comp keys edx) o)] [s o])))
-(defmethod get-from-index [ ?  ? :v] [{idx :osp} s p o] (let [edx (idx o)] (for [s (keys edx) p ((comp keys edx) s)] [s p])))
+(defmethod get-from-index [ ?  ? :v] [{idx :pos} s p o] (for [[p os] idx s (keys (os o))] [s p])) ;; emulates osp
 (defmethod get-from-index [ ?  ?  ?] [{idx :spo} s p o] (for [s (keys idx) p (keys (idx s)) o (keys ((idx s) p))] [s p o]))
 
 
@@ -74,7 +74,7 @@
 
 (declare empty-graph)
 
-(defrecord GraphIndexed [spo pos osp next-stmt-id]
+(defrecord GraphIndexed [spo pos spot tconj]
   NestedIndex
   (lowest-level-fn [this] keys)
   (lowest-level-sets-fn [this] (partial map (comp set keys)))
@@ -87,7 +87,7 @@
     (graph-add this subj pred obj gr/*default-tx-id*))
   (graph-add [this subj pred obj tx]
     (log/trace "insert: " [subj pred obj tx])
-    (let [id (or (:next-stmt-id this) 1)
+    (let [id (inc (count spot))
           new-spo (index-add spo subj pred obj id tx)]
       (if (identical? spo new-spo)
         (do
@@ -95,22 +95,28 @@
           this)
         (assoc this :spo new-spo
                :pos (index-add pos pred obj subj id tx)
-               :osp (index-add osp obj subj pred id tx)
-               :next-stmt-id (inc id)))))
+               :spot (tconj spot [subj pred obj tx])))))
   (graph-delete [this subj pred obj]
     (log/trace "delete " [subj pred obj])
     (if-let [idx (index-delete spo subj pred obj)]
       (assoc this
              :spo idx
-             :pos (index-delete pos pred obj subj)
-             :osp (index-delete osp obj subj pred))
+             :pos (index-delete pos pred obj subj))
       (do
         (log/trace "statement did not exist")
         this)))
   (graph-transact [this tx-id assertions retractions]
-    (common/graph-transact this tx-id assertions retractions (volatile! [[] [] {}])))
+    ;; make the spot vector transient for multiple additions
+    (let [tmpgraph (assoc this :spot (transient spot) :tconj conj!)
+          result (common/graph-transact tmpgraph tx-id assertions retractions (volatile! [[] [] {}]))]
+      ;; return the spot vector to persistent
+      (assoc result :spot (persistent! (:spot result)) :tconj conj)))
   (graph-transact [this tx-id assertions retractions generated-data]
-    (common/graph-transact this tx-id assertions retractions generated-data))
+    ;; make the spot vector transient for multiple additions
+    (let [tmpgraph (assoc this :spot (transient spot) :tconj conj!)
+          result (common/graph-transact tmpgraph tx-id assertions retractions generated-data)]
+      ;; return the spot vector to persistent
+      (assoc result :spot (persistent! (:spot result)) :tconj conj)))
   (graph-diff [this other]
     (when-not (= (type this) (type other))
       (throw (ex-info "Unable to compare diffs between graphs of different types" {:this this :other other})))
@@ -120,6 +126,9 @@
     (if-let [[plain-pred trans-tag] (common/check-for-transitive pred)]
       (common/get-transitive-from-index this trans-tag subj plain-pred obj)
       (get-from-index this subj pred obj)))
+  (attribute-values [this node]
+    (let [edx (spo node)]
+      (for [p (keys edx) o ((comp keys edx) p)] [p o])))
   (count-triple [this subj pred obj]
     (if-let [[plain-pred trans-tag] (common/check-for-transitive pred)]
       (count-transitive-from-index this trans-tag subj plain-pred obj)
@@ -133,4 +142,4 @@
   (node-type? [_ _ n] (gr/node-type? n))
   (find-triple [this [e a v]] (resolve-triple this e a v)))
 
-(def empty-graph (->GraphIndexed {} {} {} nil))
+(def empty-graph (->GraphIndexed {} {} [] conj))

@@ -120,6 +120,11 @@
               (log/trace "resolving [" s " " p " " o "]")
               (get-from-index this s p o)))))))
 
+  (attribute-values
+    [this node]
+    (if-let [s (find-id pool node)]
+      (get-from-index this s '?a '?v)))
+  
   (count-triple
     [this subj pred obj]
     (let [[plain-pred trans-tag] (common-index/check-for-transitive pred)
