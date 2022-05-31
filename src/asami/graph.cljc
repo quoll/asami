@@ -96,12 +96,12 @@
 #?(:cljs (swap! reader/*tag-table* assoc 'a/n node-read))
 
 ;; common implementations of the NodeAPI functions
-(def tg-ns "tg")
+(def a-ns "a")
 (def node-prefix "node-")
 (def prefix-len (count node-prefix))
 
 (defn new-node
-  ([] (->> node-prefix gensym name (keyword tg-ns)))
+  ([] (->> node-prefix gensym name (keyword a-ns)))
   ([id] (InternalNode. id)))
 
 (defn node-id [n] (subs (name n) prefix-len))
@@ -109,7 +109,7 @@
 (defn node-type? [n]
   (or 
    (instance? InternalNode n)
-   (and (keyword? n) (= tg-ns (namespace n)) (string/starts-with? (name n) node-prefix))))
+   (and (keyword? n) (= a-ns (namespace n)) (string/starts-with? (name n) node-prefix))))
 
 (defn broad-node-type?
   [n]
@@ -122,5 +122,5 @@
 (defn node-label
   "Returns a keyword label for a node"
   [n]
-  (keyword tg-ns (str "id-" (node-id n))))
+  (keyword a-ns (str "id-" (node-id n))))
 

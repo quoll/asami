@@ -1,26 +1,26 @@
 (ns ^{:doc "Converts external data into a graph format (triples)."
       :author "Paula Gearon"}
     asami.entities.writer
-  (:require [asami.entities.general :as general :refer [tg-ns KeyValue EntityMap GraphType]]
+  (:require [asami.entities.general :as general :refer [a-ns KeyValue EntityMap GraphType]]
             [asami.entities.reader :as reader]
             [zuko.node :as node]
             [schema.core :as s :refer [=>]]
             [clojure.string :as string]))
 
 ;; internal generated properties:
-;; :tg/rest List structure
-;; :tg/owns References sub entities
-;; :tg/entity When true, then indicates a top level entity
+;; :a/rest List structure
+;; :a/owns References sub entities
+;; :a/entity When true, then indicates a top level entity
 
 ;; The following 2 attributes may vary according to the database.
 ;; e.g. Datomic appends -s -l -d etc to these attributes for different datatypes
 ;; Asami uses these names without modification:
-;; :tg/first Indicates a list member by position. Returned by node/data-attribute
-;; :tg/contains Shortcut to list members. Returned by node/container-attribute
+;; :a/first Indicates a list member by position. Returned by node/data-attribute
+;; :a/contains Shortcut to list members. Returned by node/container-attribute
 
 ;; The following are graph nodes with special meaning:
-;; :tg/emtpty-list A list without entries
-;; :tg/nil a nil value
+;; :a/emtpty-list A list without entries
+;; :a/nil a nil value
 
 
 ;; provides dynamic scope of the current contents of the graph
@@ -43,6 +43,10 @@
              (s/one s/Any "attribute")
              (s/one s/Any "value")])
 
+(def identity-prop?
+  "Tests if a property is a identifier property"
+  #{:id :db/ident})
+
 (declare value-triples map->triples)
 
 (defn add-triples!
@@ -61,7 +65,7 @@
         [list-ref value-nodes]
         (let [node-ref (node/new-node *current-graph*)
               _ (when last-ref
-                  (add-triples! conj [last-ref :tg/rest node-ref]))
+                  (add-triples! conj [last-ref :a/rest node-ref]))
               value-ref (value-triples v)]
           (add-triples! conj [node-ref (node/data-attribute *current-graph* value-ref) value-ref])
           (recur (or list-ref node-ref) node-ref (conj value-nodes value-ref) vs))))))
@@ -73,7 +77,7 @@
       (doseq [vn value-nodes]
         (add-triples! conj [node (node/container-attribute *current-graph* vn) vn]))
       node)
-    :tg/empty-list))
+    :a/empty-list))
 
 (defn lookup-ref?
   "Tests if i is a lookup ref"
@@ -87,15 +91,15 @@
 
 (defn top-level-entity?
   [node]
-  (seq (node/find-triple *current-graph* [node :tg/entity true])))
+  (seq (node/find-triple *current-graph* [node :a/entity true])))
 
 (defn add-subentity-relationship
   "Adds a sub-entity relationship for a provided node. Returns the node"
   [node]
   (when-not (or (= node *current-entity*)
                 (@*top-level-entities* node)
-                (= node :tg/empty-list))
-    (add-triples! conj [*current-entity* :tg/owns node]))
+                (= node :a/empty-list))
+    (add-triples! conj [*current-entity* :a/owns node]))
   node)
 
 (defn value-triples
@@ -108,7 +112,7 @@
     (sequential? v) (-> (value-triples-list v) add-subentity-relationship)
     (set? v) (value-triples-list (seq v))
     (map? v) (-> (map->triples v) add-subentity-relationship)
-    (nil? v) :tg/nil
+    (nil? v) :a/nil
     :default v))
 
 (s/defn property-vals
@@ -116,12 +120,14 @@
    and builds triples around it"
   [entity-ref :- s/Any
    [property value] :- KeyValue]
-  (if (set? value)
-    (doseq [v value]
-      (let [vr (value-triples v)]
-        (add-triples! conj [entity-ref property vr])))
-    (let [v (value-triples value)]
-      (add-triples! conj [entity-ref property v]))))
+  (if (identity-prop? property)
+    (add-triples! conj [entity-ref property value])
+    (if (set? value)
+      (doseq [v value]
+        (let [vr (value-triples v)]
+          (add-triples! conj [entity-ref property vr])))
+      (let [v (value-triples value)]
+        (add-triples! conj [entity-ref property v])))))
 
 (defn new-node
   [id]
@@ -210,15 +216,15 @@
   ([j :- EntityMap]
    (let [node-ref (map->triples j)]
      (if (:db/ident j)
-       (add-triples! conj [node-ref :tg/entity true])
-       (add-triples! into [[node-ref :db/ident (name-for node-ref)] [node-ref :tg/entity true]]))
+       (add-triples! conj [node-ref :a/entity true])
+       (add-triples! into [[node-ref :db/ident (name-for node-ref)] [node-ref :a/entity true]]))
      @*id-map*)))
 
 (defn backtrack-unlink-top-entities
   "Goes back through generated triples and removes sub-entity links to entities that were later
   determined to be top-level entities."
   [top-entities triples]
-  (remove #(and (= :tg/owns (nth % 1)) (top-entities (nth % 2))) triples))
+  (remove #(and (= :a/owns (nth % 1)) (top-entities (nth % 2))) triples))
 
 (s/defn entities->triples :- [Triple]
   "Converts objects into a sequence of triples."
@@ -246,7 +252,7 @@
    [k v]]
   (or
    (if-let [subpv (reader/check-structure graph k v)]
-     (if-not (some #(= :tg/entity (first %)) subpv) 
+     (if-not (some #(= :a/entity (first %)) subpv) 
        (cons [node-ref k v] (mapcat (partial existing-triples graph v) subpv))))
    [[node-ref k v]]))
 

@@ -158,7 +158,7 @@
   [triples :- [Axiom]]
   (reduce (fn [acc [e a v :as triple]]
             (let [r (conj acc triple)]
-              (if (= :db/ident a) (conj r [e :tg/entity true]) r)))
+              (if (= :db/ident a) (conj r [e :a/entity true]) r)))
           []
           triples))
 

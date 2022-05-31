@@ -6,7 +6,7 @@
             [zuko.node :as node]
             [naga.store :as store :refer [StorageType]]))
 
-(def tg-ns "tg")
+(def a-ns "a")
 
 (def KeyValue [(s/one s/Any "Key") (s/one s/Any "Value")])
 

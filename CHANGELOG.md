@@ -1,5 +1,19 @@
 # Change Log
 
+## [2.3.0] - 2022-03-19
+### Changed
+- All keywords in the `tg` namespace have been updated to use the `a` namespace. This keeps them short, and makes more sense for the project, which no longer has anything to do with "ThreatGrid".
+
+### Fixed
+- Passing seqs directly to transactions will no longer cause errors.
+
+## [2.2.4] - 2022-02-22
+### Added
+- The `:db/ident` and `:id` attributes may now use compound keys.
+
+### Fixed
+- Fixed a problem where resolving a pattern on disk will lead to an error if the resolution is empty.
+
 ## [2.2.3] - 2021-11-10
 ### Added
 - The `asami.core/entity` function now accepts Connections as well as Databases. This will select the latest database from the connection.
@@ -276,10 +290,10 @@
 
 ## 1.1.0 - 2020-08-05
 ### Added
-- Attributes can be modified on entities by using the `'` annotation (see [Replacement Annotation doc](https://github.com/threatgrid/asami/wiki/Transactions#replacement-annotations) for details)
-- Arrays in entities can be appended to by using the `+` annotation on attributes (see [Append Annotation doc](https://github.com/threatgrid/asami/wiki/Transactions#append-annotation) for details)
+- Attributes can be modified on entities by using the `'` annotation (see [Replacement Annotation doc](https://github.com/quoll/asami/wiki/4.-Transactions#replacement-annotations) for details)
+- Arrays in entities can be appended to by using the `+` annotation on attributes (see [Append Annotation doc](https://github.com/quoll/asami/wiki/4.-Transactions#append-annotation) for details)
 - Queries now accept `_` symbols as wildcards, and accept shortened constraints (not just triples)
-- Introduce new `:find` clause syntaxes (see [Find Clause Description doc](https://github.com/threatgrid/asami/wiki/Querying#find-clause-description) for details)
+- Introduce new `:find` clause syntaxes (see [Find Clause Description doc](https://github.com/quoll/asami/wiki/6.-Querying#find-clause-description) for details)
 - Created documentation for the API, data structures, querying, and creating transactions.
 
 ### Changed
@@ -299,44 +313,46 @@
 ### Added
 - Introduced Update Annotations
 
-[Unreleased]: https://github.com/threatgrid/asami/compare/2.2.3...HEAD
-[2.2.3]: https://github.com/threatgrid/asami/compare/2.2.2...2.2.3
-[2.2.2]: https://github.com/threatgrid/asami/compare/2.2.1...2.2.2
-[2.2.1]: https://github.com/threatgrid/asami/compare/2.2.0...2.2.1
-[2.2.0]: https://github.com/threatgrid/asami/compare/2.1.3...2.2.0
-[2.1.3]: https://github.com/threatgrid/asami/compare/2.1.2...2.1.3
-[2.1.2]: https://github.com/threatgrid/asami/compare/2.1.1...2.1.2
-[2.1.1]: https://github.com/threatgrid/asami/compare/2.1.0...2.1.1
-[2.1.0]: https://github.com/threatgrid/asami/compare/2.0.6...2.1.0
-[2.0.6]: https://github.com/threatgrid/asami/compare/2.0.5...2.0.6
-[2.0.5]: https://github.com/threatgrid/asami/compare/2.0.4...2.0.5
-[2.0.4]: https://github.com/threatgrid/asami/compare/2.0.3...2.0.4
-[2.0.3]: https://github.com/threatgrid/asami/compare/2.0.2...2.0.3
-[2.0.2]: https://github.com/threatgrid/asami/compare/2.0.1...2.0.2
-[2.0.1]: https://github.com/threatgrid/asami/compare/2.0.0...2.0.1
-[2.0.0]: https://github.com/threatgrid/asami/compare/2.0.0-alpha9...2.0.0
-[2.0.0-alpha9]: https://github.com/threatgrid/asami/compare/2.0.0-alpha8...2.0.0-alpha9
-[2.0.0-alpha8]: https://github.com/threatgrid/asami/compare/2.0.0-alpha7...2.0.0-alpha8
-[2.0.0-alpha7]: https://github.com/threatgrid/asami/compare/2.0.0-alpha6...2.0.0-alpha7
-[2.0.0-alpha6]: https://github.com/threatgrid/asami/compare/2.0.0-alpha5...2.0.0-alpha6
-[2.0.0-alpha5]: https://github.com/threatgrid/asami/compare/2.0.0-alpha4...2.0.0-alpha5
-[2.0.0-alpha4]: https://github.com/threatgrid/asami/compare/2.0.0-alpha3...2.0.0-alpha4
-[2.0.0-alpha3]: https://github.com/threatgrid/asami/compare/2.0.0-alpha2...2.0.0-alpha3
-[2.0.0-alpha2]: https://github.com/threatgrid/asami/compare/2.0.0-alpha...2.0.0-alpha2
-[2.0.0-alpha]: https://github.com/threatgrid/asami/compare/1.2.14...2.0.0-alpha
-[1.2.15]: https://github.com/threatgrid/asami/compare/1.2.14...1.2.15
-[1.2.14]: https://github.com/threatgrid/asami/compare/1.2.13...1.2.14
-[1.2.13]: https://github.com/threatgrid/asami/compare/1.2.12...1.2.13
-[1.2.12]: https://github.com/threatgrid/asami/compare/1.2.11...1.2.12
-[1.2.11]: https://github.com/threatgrid/asami/compare/1.2.10...1.2.11
-[1.2.10]: https://github.com/threatgrid/asami/compare/1.2.9...1.2.10
-[1.2.9]: https://github.com/threatgrid/asami/compare/1.2.8...1.2.9
-[1.2.8]: https://github.com/threatgrid/asami/compare/1.2.7...1.2.8
-[1.2.7]: https://github.com/threatgrid/asami/compare/1.2.6...1.2.7
-[1.2.6]: https://github.com/threatgrid/asami/compare/1.2.5...1.2.6
-[1.2.5]: https://github.com/threatgrid/asami/compare/1.2.4...1.2.5
-[1.2.4]: https://github.com/threatgrid/asami/compare/1.2.3...1.2.4
-[1.2.3]: https://github.com/threatgrid/asami/compare/1.2.2...1.2.3
-[1.2.2]: https://github.com/threatgrid/asami/compare/1.2.1...1.2.2
-[1.2.1]: https://github.com/threatgrid/asami/compare/1.2.0...1.2.1
-[1.2.0]: https://github.com/threatgrid/asami/compare/1.1.0...1.2.0
+[Unreleased]: https://github.com/quoll/asami/compare/2.3.3...HEAD
+[2.3.0]: https://github.com/quoll/asami/compare/2.2.4...2.3.0
+[2.2.4]: https://github.com/quoll/asami/compare/2.2.3...2.2.4
+[2.2.3]: https://github.com/quoll/asami/compare/2.2.2...2.2.3
+[2.2.2]: https://github.com/quoll/asami/compare/2.2.1...2.2.2
+[2.2.1]: https://github.com/quoll/asami/compare/2.2.0...2.2.1
+[2.2.0]: https://github.com/quoll/asami/compare/2.1.3...2.2.0
+[2.1.3]: https://github.com/quoll/asami/compare/2.1.2...2.1.3
+[2.1.2]: https://github.com/quoll/asami/compare/2.1.1...2.1.2
+[2.1.1]: https://github.com/quoll/asami/compare/2.1.0...2.1.1
+[2.1.0]: https://github.com/quoll/asami/compare/2.0.6...2.1.0
+[2.0.6]: https://github.com/quoll/asami/compare/2.0.5...2.0.6
+[2.0.5]: https://github.com/quoll/asami/compare/2.0.4...2.0.5
+[2.0.4]: https://github.com/quoll/asami/compare/2.0.3...2.0.4
+[2.0.3]: https://github.com/quoll/asami/compare/2.0.2...2.0.3
+[2.0.2]: https://github.com/quoll/asami/compare/2.0.1...2.0.2
+[2.0.1]: https://github.com/quoll/asami/compare/2.0.0...2.0.1
+[2.0.0]: https://github.com/quoll/asami/compare/2.0.0-alpha9...2.0.0
+[2.0.0-alpha9]: https://github.com/quoll/asami/compare/2.0.0-alpha8...2.0.0-alpha9
+[2.0.0-alpha8]: https://github.com/quoll/asami/compare/2.0.0-alpha7...2.0.0-alpha8
+[2.0.0-alpha7]: https://github.com/quoll/asami/compare/2.0.0-alpha6...2.0.0-alpha7
+[2.0.0-alpha6]: https://github.com/quoll/asami/compare/2.0.0-alpha5...2.0.0-alpha6
+[2.0.0-alpha5]: https://github.com/quoll/asami/compare/2.0.0-alpha4...2.0.0-alpha5
+[2.0.0-alpha4]: https://github.com/quoll/asami/compare/2.0.0-alpha3...2.0.0-alpha4
+[2.0.0-alpha3]: https://github.com/quoll/asami/compare/2.0.0-alpha2...2.0.0-alpha3
+[2.0.0-alpha2]: https://github.com/quoll/asami/compare/2.0.0-alpha...2.0.0-alpha2
+[2.0.0-alpha]: https://github.com/quoll/asami/compare/1.2.14...2.0.0-alpha
+[1.2.15]: https://github.com/quoll/asami/compare/1.2.14...1.2.15
+[1.2.14]: https://github.com/quoll/asami/compare/1.2.13...1.2.14
+[1.2.13]: https://github.com/quoll/asami/compare/1.2.12...1.2.13
+[1.2.12]: https://github.com/quoll/asami/compare/1.2.11...1.2.12
+[1.2.11]: https://github.com/quoll/asami/compare/1.2.10...1.2.11
+[1.2.10]: https://github.com/quoll/asami/compare/1.2.9...1.2.10
+[1.2.9]: https://github.com/quoll/asami/compare/1.2.8...1.2.9
+[1.2.8]: https://github.com/quoll/asami/compare/1.2.7...1.2.8
+[1.2.7]: https://github.com/quoll/asami/compare/1.2.6...1.2.7
+[1.2.6]: https://github.com/quoll/asami/compare/1.2.5...1.2.6
+[1.2.5]: https://github.com/quoll/asami/compare/1.2.4...1.2.5
+[1.2.4]: https://github.com/quoll/asami/compare/1.2.3...1.2.4
+[1.2.3]: https://github.com/quoll/asami/compare/1.2.2...1.2.3
+[1.2.2]: https://github.com/quoll/asami/compare/1.2.1...1.2.2
+[1.2.1]: https://github.com/quoll/asami/compare/1.2.0...1.2.1
+[1.2.0]: https://github.com/quoll/asami/compare/1.1.0...1.2.0

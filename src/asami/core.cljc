@@ -193,12 +193,14 @@
   :tx-data      sequence of datoms produced by the transaction
   :tempids      mapping of the temporary IDs in entities to the allocated nodes"
   [{:keys [name state] :as connection} :- ConnectionType
-   {:keys [tx-data tx-triples executor update-fn input-limit] :as tx-info} :- TransactData]
+   tx-info :- TransactData]
 
   ;; Detached databases need to be reattached when transacted into
   (check-attachment connection)
 
-  (let [op (if update-fn
+  ;; destructure tx-info, if it can be destructured
+  (let [{:keys [tx-data tx-triples executor update-fn input-limit]} (if (map? tx-info) tx-info {})
+        op (if update-fn
              (fn []
                (let [[db-before db-after] (storage/transact-update connection update-fn)]
                  {:db-before db-before
@@ -306,7 +308,7 @@
 (defn q
   "Execute a query against the provided inputs.
    The query can be a map, a seq, or a string.
-   See the documentation at https://github.com/threatgrid/asami/wiki/Querying
+   See the documentation at https://github.com/quoll/asami/wiki/6.-Querying
    for a full description of queries.
    The end of the parameters may include a series of key/value pairs for query options.
    The only recognized option for now is:

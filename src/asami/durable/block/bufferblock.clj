@@ -72,15 +72,21 @@
     ;; a single writer allows for position/put
 
     (put-bytes! [this offset len the-bytes]
-      (doto ^ByteBuffer bb (.position (int (+ byte-offset offset))) (.put the-bytes 0 len))
+      (doto ^ByteBuffer bb
+        (.position (int (+ byte-offset offset)))
+        (.put ^bytes the-bytes (int 0) (int len)))
       this)
 
     (put-ints! [this offset len the-ints]
-      (doto ^IntBuffer ib (.position (int (+ int-offset offset))) (.put the-ints 0 len))
+      (doto ^IntBuffer ib
+        (.position (int (+ int-offset offset)))
+        (.put ^ints the-ints (int 0) (int len)))
       this)
 
     (put-longs! [this offset len the-longs]
-      (doto ^LongBuffer lb (.position (int (+ long-offset offset))) (.put the-longs 0 len))
+      (doto ^LongBuffer lb
+        (.position (int (+ long-offset offset)))
+        (.put ^longs the-longs (int 0) (int len)))
       this)
 
     (put-block!

@@ -67,6 +67,28 @@
       (recur nn)
       n)))
 
+(deftest test-short-store
+  (let [pool (create-pool "pool-short-test")
+        data [".......three hundred and twenty-five"
+              ".......four hundred and thirty-six"
+              ["data" :one 1]
+              {:id 1 :data ["two" 2]}
+              {:id 2 "data" 2}]
+        [ids pool] (reduce (fn [[ids p] d]
+                             (let [[id p'] (write! p d)]
+                               [(conj ids id) p']))
+                           [[] pool] data)
+        id-values (map vector ids data)]
+    (doseq [[id value] id-values]
+      (is (= value (find-object pool id))))
+
+    (is (= (nth ids 2) (find-id pool (nth data 2))))
+    (doseq [[id value] (map vector ids data)]
+      (is (= id (find-id pool value)) (str "data: " value)))
+    (close pool))
+
+  (recurse-delete "pool-short-test"))
+
 (deftest test-storage
   (let [pool (create-pool "pool-test")
         data ["abcdefgh"
@@ -79,7 +101,10 @@
               :seven-hundred-and-one
               :eight-hundred-and-two
               :nine-hundred-and-three
-              :ten-hundred-and-four]
+              :ten-hundred-and-four
+              ["data" :one 1]
+              {:id 1 :data ["two" 2]}
+              {:id 2 "data" 2}]
         [ids pool] (reduce (fn [[ids p] d]
                              (let [[id p'] (write! p d)]
                                [(conj ids id) p']))
@@ -114,44 +139,47 @@
               :db/ident
               "p"
               :a
-              :tg/entity
+              :a/entity
               true
               :a
               :name
+              ["data" :one 1]
               "Persephone Konstantopoulos"
               :a
               :age
               23
               :a
               :friends
-              :tg/node-b
-              :tg/node-b
-              :tg/first
-              :tg/node-1
-              :tg/node-b
-              :tg/rest
-              :tg/node-c
-              :tg/node-c
-              :tg/first
-              :tg/node-2
-              :tg/node-1
+              :a/node-b
+              :a/node-b
+              :a/first
+              :a/node-1
+              :a/node-b
+              :a/rest
+              :a/node-c
+              :a/node-c
+              :a/first
+              {:id 1 :data ["two" 2]}
+              :a/node-2
+              :a/node-1
               :name
               "Anastasia Christodoulopoulos"
-              :tg/node-1
+              :a/node-1
               :age
               23
-              :tg/node-2
+              :a/node-2
               :name
               "Anne Richardson"
-              :tg/node-2
+              :a/node-2
               :age
               25
-              :tg/node-b
-              :tg/contains
-              :tg/node-1
-              :tg/node-b
-              :tg/contains
-              :tg/node-2]
+              {:id 2 "data" 2}
+              :a/node-b
+              :a/contains
+              :a/node-1
+              :a/node-b
+              :a/contains
+              :a/node-2]
         [ids pool] (reduce (fn [[ids p] d]
                              (let [[id p'] (write! p d)]
                                [(conj ids id) p']))

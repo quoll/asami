@@ -391,19 +391,19 @@
 
 (def entity-data
   [[:a :db/ident "p"]
-   [:a :tg/entity true]
+   [:a :a/entity true]
    [:a :name "Persephone Konstantopoulos"]
    [:a :age 23]
-   [:a :friends :tg/node-b]
-   [:tg/node-b :tg/first :tg/node-1]
-   [:tg/node-b :tg/rest :tg/node-c]
-   [:tg/node-c :tg/first :tg/node-2]
-   [:tg/node-1 :name "Anastasia Christodoulopoulos"]
-   [:tg/node-1 :age 23]
-   [:tg/node-2 :name "Anne Richardson"]
-   [:tg/node-2 :age 25]
-   [:tg/node-b :tg/contains :tg/node-1]
-   [:tg/node-b :tg/contains :tg/node-2]])
+   [:a :friends :a/node-b]
+   [:a/node-b :a/first :a/node-1]
+   [:a/node-b :a/rest :a/node-c]
+   [:a/node-c :a/first :a/node-2]
+   [:a/node-1 :name "Anastasia Christodoulopoulos"]
+   [:a/node-1 :age 23]
+   [:a/node-2 :name "Anne Richardson"]
+   [:a/node-2 :age 25]
+   [:a/node-b :a/contains :a/node-1]
+   [:a/node-b :a/contains :a/node-2]])
 
 (deftest test-entity-data
   (let [dbname "entity-db"
