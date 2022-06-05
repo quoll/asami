@@ -161,7 +161,10 @@
          retractions (mapv (comp (partial mapv ref->id) rest) retract-stmts)
          add-triples (fn [[acc racc ids top-ids :as last-result] obj]
                        (if (and limit (> (count acc) limit))
+                         ;; short circuit introduced for systems where excessively large transactions are filling memory
                          (reduced last-result)
+                         ;; normal insertion
+                         ;; maps are entities to be turned into triples
                          (if (map? obj)
                            (try
                              (let [[triples rtriples new-ids new-top-ids] (entity-triples graph
@@ -174,19 +177,27 @@
                                (if-let [overflow (:overflow (ex-data e))]
                                  (reduced last-result)
                                  (throw e))))
+                           ;; expecting a datom, starting with :db/add. May exentually expect :db/fn
+                           ;; confirm structure
                            (if (and (seqable? obj)
                                     (= 4 (count obj))
                                     (= :db/add (first obj)))
                              (or
+                              ;; look for statements of [:db/add xxx :db/id zzz]
                               (when (= (nth obj 2) :db/id)
-                                (let [id (nth obj 3)]
-                                  (when (temp-id? id)
+                                (let [id (nth obj 3)]  ;; The ID is the final element
+                                  (when (temp-id? id)  ;; If the ID is temporary
+                                    ;; then look it up in the known temporary IDs or generate one if needed.
                                     (let [new-id (or (ids id) (node/new-node graph))]
-                                      [(conj acc (assoc (vec-rest obj) 2 new-id))
+                                      [(conj acc (assoc (vec-rest obj) 2 new-id))  ;; add a triple, with the temp ID replaced with the found ID
                                        racc
-                                       (assoc ids (or id new-id) new-id)
+                                       (assoc ids (or id new-id) new-id)  ;; update the ID map to include the existing or generated ID
                                        top-ids]))))
-                              [(conj acc (mapv #(or (ids %) (ref->id %)) (rest obj))) racc ids top-ids])
+                              ;; otherwise, a statement of [:db/add xxx yyy zzz] where yyy is not :db/id
+                               ;; look for known temporary IDs in the vector,
+                               ;; replacing any that are found
+                              [(conj acc (mapv #(or (ids %) (ref->id %)) (rest obj)))
+                               racc ids top-ids])
                              (throw (ex-info (str "Bad data in transaction: " obj) {:data obj}))))))
          [triples rtriples id-map top-level-ids] (reduce add-triples [[] retractions {} #{}] new-data)
          triples (writer/backtrack-unlink-top-entities top-level-ids triples)]
