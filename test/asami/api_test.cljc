@@ -15,16 +15,6 @@
   #?(:clj (:import [clojure.lang ExceptionInfo]
                    [java.time Instant])))
 
-(def ^:dynamic *conn* nil)
-
-(use-fixtures :each (fn init-test-conn+cleanup-all [test]
-                      (binding [*conn* (a/connect "asami:mem://apitest")]
-                        (try (test)
-                             (finally
-                               (a/delete-database "asami:mem://apitest")
-                               (doseq [url (keys @a/connections)]
-                                 (a/delete-database url)))))))
-
 (defn other-now
   "Create a different kind of instant object on the JVM"
   []
@@ -53,7 +43,7 @@
     (is (= "banana" (:name cm)))))
 
 (deftest test-input-limit
-  (let [c *conn*
+  (let [c (connect "asami:mem://limit1")
         maksim {:db/id -1
                 :name  "Maksim"
                 :age   45
@@ -175,7 +165,7 @@
     (is (= 2 (count (:tx-data @r))))))
 
 (deftest test-retractions
-  (let [c *conn*
+  (let [c (connect "asami:mem://testr")
         {d :db-after} @(transact c {:tx-data [{:db/ident "bobid"
                                                :person/name "Bob"
                                                :person/spouse "aliceid"}
@@ -205,7 +195,7 @@
              (q '[:find ?e ?a ?v :where [?e ?a ?v]] (:db-after r2)))))))
 
 (deftest test-assertions-retractions-using-lookup-refs
-  (let [c *conn*
+  (let [c (connect "asami:mem://testlr")
         {d :db-after} @(transact c {:tx-data [{:db/id -1
                                                :db/ident "bobid"
                                                :person/name "Bob"
@@ -245,7 +235,7 @@
     (is (= {:person/name "Betty" :person/age 43 :person/friend bob} betty))))
 
 (deftest test-entity
-  (let [c *conn*
+  (let [c (connect "asami:mem://test4")
         maksim {:db/id -1
                 :db/ident :maksim
                 :id    "MakOvS"
@@ -295,7 +285,7 @@
            (entity d three)))))
 
 (deftest test-entity-arrays
-  (let [c *conn*
+  (let [c (connect "asami:mem://test4")
         data {:db/id -1
               :db/ident :home
               :name  "Home"
@@ -313,7 +303,7 @@
            (entity d one)))))
 
 (deftest test-entity-nested
-  (let [c *conn*
+  (let [c (connect "asami:mem://test4b")
         d1 {:db/id -1
             :db/ident "nested-object"
             :name "nested"}
@@ -422,7 +412,7 @@
            #{:db/ident :name :age :aka :a/entity :a/contains :a/first :a/rest :a/owns}))))
 
 (deftest test-id-update
-  (let [c *conn*
+  (let [c (connect "asami:mem://test6a")
         maksim {:db/id -1
                 :id :maksim
                 :name  "Maksim"
@@ -460,7 +450,7 @@
            {:id :anna :name "Anne" :age #{31 32} :husband {:id :maksim} :aka ["Anitzka"]}))))
 
 (deftest test-update
-  (let [c *conn*
+  (let [c (connect "asami:mem://test6")
         maksim {:db/id -1
                 :db/ident :maksim
                 :name  "Maksim"
@@ -494,7 +484,7 @@
            #{["Maks Otto von Stirlitz"]}))))
 
 (deftest test-update-struct
-  (let [c *conn*
+  (let [c (connect "asami:mem://test6s")
         maksim {:db/id -1
                 :db/ident [:maksim 45]
                 :name  "Maksim"
@@ -531,7 +521,7 @@
 
 
 (deftest test-append
-  (let [c *conn*
+  (let [c (connect "asami:mem://test7")
         maksim {:db/id -1
                 :db/ident :maksim
                 :name  "Maksim"
@@ -630,7 +620,7 @@
      [:db/add -7 :is-in -8]])
 
 (deftest test-transitive
-  (let [c *conn*
+  (let [c (connect "asami:mem://test8")
         tx (transact c {:tx-data transitive-data})
         d (:db-after @tx)]
     (is (=
@@ -654,7 +644,7 @@
 
 ;; tests both the show-plan function and the options
 (deftest test-plan
-  (let [c *conn*
+  (let [c (connect "asami:mem://test9")
         {d :db-after :as tx} @(transact c {:tx-data transitive-data})
         p1 (show-plan '[:find [?name ...]
                          :where [?e :name "Washington Monument"]
@@ -683,7 +673,7 @@
                        [?e :name "Washington Monument"]]}))))
 
 (deftest test-plan-with-opt
-  (let [c *conn*
+  (let [c (connect "asami:mem://test10")
         {d :db-after :as tx} @(transact c {:tx-data [{:movie/title "Explorers"
                                                       :movie/genre "adventure/comedy/family"
                                                       :movie/release-year 1985}
@@ -723,7 +713,7 @@
     :name "Shelley, Mary"}])
 
 (deftest test-optional
-  (let [c *conn*
+  (let [c (connect "asami:mem://test10")
         {d :db-after :as tx} @(transact c {:tx-data opt-data})
         rx (q '[:find ?name ?t
                 :where [?a :name ?name]
@@ -875,7 +865,7 @@
 
 (deftest test-update-unowned
   (testing "Doing an update on an attribute that references a top level entity"
-    (let [c *conn*
+    (let [c (connect "asami:mem://testupdate")
           {d1 :db-after :as tx1} @(transact
                                    c {:tx-data
                                       [{:db/ident :p1
