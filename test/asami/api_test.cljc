@@ -908,3 +908,8 @@
              {:person/name "Person"})))))
 
 #?(:cljs (run-tests))
+
+(comment
+  ;; Delete all test DBs so that tests can be re-run with a fresh slate
+  (doseq [url (keys @a/connections)]
+    (a/delete-database url)))
