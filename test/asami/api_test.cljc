@@ -217,7 +217,8 @@
       (is (= {:person/name "Betty" :person/age 43} betty)))))
 
 (deftest test-db-add-with-lookup-ref-creates-entity
-  (let [{d :db-after} @(transact *conn* {:tx-data [[:db/add [:id "bobid"] :id "bobid"]
+  (let [c (connect "asami:mem://testlrce")
+        {d :db-after} @(transact c {:tx-data [[:db/add [:id "bobid"] :id "bobid"]
                                                    [:db/add [:id "bobid"] :person/name "Bob"]
                                                    [:db/add [:id "bobid"] :person/age 42]
 
