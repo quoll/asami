@@ -80,9 +80,9 @@
     :a/empty-list))
 
 (defn lookup-ref?
-  "Tests if i is a lookup ref"
+  "Tests if i is a lookup ref. Similar to https://blog.datomic.com/2014/02/datomic-lookup-refs.html"
   [i]
-  (and (vector? i) (= 2 (count i)) (#{:db/id :db/ident :id} (first i))))
+  (and (vector? i) (= 2 (count i)) (keyword? (first i))))
 
 (defn resolve-ref
   [[prop id]]
