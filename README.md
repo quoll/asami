@@ -1,4 +1,4 @@
-# asami [![Build Status](https://travis-ci.org/quoll/asami.svg?branch=main)](https://travis-ci.org/quoll/asami) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+# asami [![Build Status](https://travis-ci.com/quoll/asami.svg?branch=main)](https://travis-ci.com/quoll/asami) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 A graph database, for Clojure and ClojureScript.
 
@@ -123,10 +123,10 @@ Entities found in a query can be extracted back out as objects using the [`entit
 ```clojure
 ;; find the entity IDs. This variation in the :find clause asks for a list of just the ?m variable
 => (d/q '[:find [?m ...] :where [?m :movie/release-year 1995]] db)
-(:tg/node-10327 :tg/node-10326)
+(:a/node-10327 :a/node-10326)
 
 ;; get a single entity
-=> (d/entity db :tg/node-10327)
+=> (d/entity db :a/node-10327)
 #:movie{:title "Toy Story",
         :genre "animation/adventure",
         :release-year 1995}
@@ -245,7 +245,7 @@ Let's find the subgraph from Fred:
 ```
 This returns the _nodes_ in the graph, but not the scalar values. For instance:
 ```clojure
-#{:tg/node-10330 :tg/node-10329 :tg/node-10331 :tg/node-10332}
+#{:a/node-10330 :a/node-10329 :a/node-10331 :a/node-10332}
 ```
 These nodes can be used as the input to a query to get their names:
 ```clojure
