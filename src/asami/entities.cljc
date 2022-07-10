@@ -182,23 +182,36 @@
                            (if (and (seqable? obj)
                                     (= 4 (count obj))
                                     (= :db/add (first obj)))
-                             (or
-                              ;; look for statements of [:db/add xxx :db/id zzz]
-                              (when (= (nth obj 2) :db/id)
-                                (let [id (nth obj 3)]  ;; The ID is the final element
-                                  (when (temp-id? id)  ;; If the ID is temporary
-                                    ;; then look it up in the known temporary IDs or generate one if needed.
-                                    (let [new-id (or (ids id) (node/new-node graph))]
-                                      [(conj acc (assoc (vec-rest obj) 2 new-id))  ;; add a triple, with the temp ID replaced with the found ID
-                                       racc
-                                       (assoc ids (or id new-id) new-id)  ;; update the ID map to include the existing or generated ID
-                                       top-ids]))))
-                              ;; otherwise, a statement of [:db/add xxx yyy zzz] where yyy is not :db/id
-                               ;; look for known temporary IDs in the vector,
-                               ;; replacing any that are found
-                              [(conj acc (mapv #(or (ids %) (ref->id %)) (rest obj)))
-                               racc ids top-ids])
+                             (let [entity (nth obj 1)
+                                   attribute (nth obj 2)]
+                               (or
+                                 ;; Ex.: `[:db/add [:id X] :id X]` that creates a new entity
+                                 (when-let [ref (and (writer/lookup-ref? entity)
+                                                     (= (first entity) attribute)
+                                                     entity)]
+                                   (let [new-id (or (ids ref) (node/new-node graph))]
+                                     [(conj acc (assoc (vec-rest obj) 0 new-id)) ;; update the triple to use the id
+                                      racc
+                                      (assoc ids ref new-id) ;; map the entity ref to the id
+                                      top-ids]))
+                                 ;; Ex.: `[:db/add -1 :db/id -1]` creating an entity with a negative number temporary id
+                                 (when (= attribute :db/id)
+                                   (let [id (nth obj 3)]
+                                     (when (temp-id? id)
+                                       (let [new-id (or (ids id) (node/new-node graph))
+                                             also-id (nth obj 1)
+                                             triple (assoc (vec-rest obj) 0 new-id 2 new-id)  ;; update both the first and third positions to the new ID
+                                             new-ids (if (not= also-id new-id)  ;; test if the IDs match
+                                                       ;; no match, so map both values to the new ID
+                                                       (if id
+                                                         (assoc ids id new-id also-id new-id)
+                                                         (assoc ids also-id new-id))   ;; no second id, so just map the first id value
+                                                       (assoc ids (or id new-id) new-id))]  ;; IDs match, so just connect them to the new ID
+                                         [(conj acc triple) racc new-ids top-ids]))))
+                                 (let [triple (mapv #(or (ids %) (ref->id %)) (rest obj))]
+                                   [(conj acc triple) racc ids top-ids])))
                              (throw (ex-info (str "Bad data in transaction: " obj) {:data obj}))))))
          [triples rtriples id-map top-level-ids] (reduce add-triples [[] retractions {} #{}] new-data)
          triples (writer/backtrack-unlink-top-entities top-level-ids triples)]
      [triples rtriples id-map])))
+

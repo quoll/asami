@@ -1,14 +1,8 @@
-(ns asami.memory-index-test
-  #?(:clj
-     (:require [asami.graph :refer [graph-add resolve-pattern count-pattern]]
-               [asami.index :refer [empty-graph]]
-               [schema.test :as st :refer [deftest]]
-               [clojure.test :as t :refer [testing is run-tests]])
-     :cljs
-     (:require [asami.graph :refer [graph-add resolve-pattern count-pattern]]
-               [asami.index :refer [empty-graph]]
-               [schema.test :as st :refer-macros [deftest]]
-               [clojure.test :as t :refer-macros [testing is run-tests]])))
+(ns asami.seqgraph-test
+  (:require [asami.graph :refer [graph-add resolve-pattern count-pattern]]
+     [asami.seqgraph :refer [empty-graph new-graph]]
+     [schema.test :as st :refer [deftest] :refer-macros [deftest]]
+     [clojure.test :as t :refer [testing is run-tests] :refer-macros [testing is run-tests]]))
 
 (t/use-fixtures :once st/validate-schemas)
 
@@ -32,9 +26,9 @@
   [g pattern]
   (into #{} (resolve-pattern g pattern)))
 
-(deftest test-load
-  (let [g (assert-data empty-graph data)
-        r1 (unordered-resolve g '[:a ?a ?b])
+(defn do-load-test
+  [g]
+  (let [r1 (unordered-resolve g '[:a ?a ?b])
         r2 (unordered-resolve g '[?a :p2 ?b])
         r3 (unordered-resolve g '[:a :p1 ?a])
         r4 (unordered-resolve g '[?a :p2 :z])
@@ -61,6 +55,15 @@
     (is (empty? r8))
     (is (= (into #{} data) r9))))
 
+(deftest test-load
+  (do-load-test (assert-data empty-graph data)))
+
+(deftest test-wrap
+  (do-load-test (new-graph data)))
+
+(deftest test-wrap-seqs
+  (do-load-test (new-graph (map list* data))))
+
 (deftest test-count
   (let [g (assert-data empty-graph data)
         r1 (count-pattern g '[:a ?a ?b])
@@ -83,23 +86,4 @@
     (is (= 8 r9))))
 
 #?(:cljs (run-tests))
-
-(deftest test-txn-values
-  (let [g (-> empty-graph
-              (assert-data (take 2 data) 1)
-              (assert-data (drop 2 data) 2))
-        last-stmt-id (count data)]
-    (is (= last-stmt-id (count (:spot g))))
-    ;; TODO use actual queries instead once they're supported
-    (is (= 1 (get-in g [:spo :a :p1 :y :t])))
-    (is (= 1 (get-in g [:pos :p1 :y :a :t])))
-
-    (is (= 2 (get-in g [:spo :c :p4 :t :t])))
-    (is (= 2 (get-in g [:pos :p4 :t :c :t])))
-
-    (is (= 1 (get-in g [:spo :a :p1 :x :id])))
-    (is (= 1 (get-in g [:pos :p1 :x :a :id])))
-
-    (is (= last-stmt-id (get-in g [:spo :c :p4 :t :id])))
-    (is (= last-stmt-id (get-in g [:pos :p4 :t :c :id])))))
 

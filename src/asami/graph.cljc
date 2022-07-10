@@ -18,6 +18,7 @@
     "Bulk operation to add and remove multiple statements in a single operation")
   (graph-diff [this other] "Returns all subjects that have changed in this graph, compared to other")
   (resolve-triple [this subj pred obj] "Resolves patterns from the graph, and returns unbound columns only")
+  (attribute-values [this node] "Returns all predicate/objects or attribute/values for a node")
   (count-triple [this subj pred obj] "Resolves patterns from the graph, and returns the size of the resolution"))
 
 (def GraphType (s/pred #(satisfies? Graph %1)))

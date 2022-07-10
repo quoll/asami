@@ -3,6 +3,7 @@
     asami.entities.reader
   (:require [asami.entities.general :as general :refer [a-ns KeyValue EntityMap GraphType]]
             [zuko.node :as node]
+            [asami.graph :as graph]
             [schema.core :as s :refer [=>]]
             [clojure.string :as string]))
 

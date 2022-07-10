@@ -18,7 +18,7 @@
 (s/defn subgraph-from-node :- #{s/Any}
   "Finds a single subgraph for an index graph. Returns all entity IDs that appear
    in the same subgraph as the provided node."
-  [{:keys [spo osp] :as graph} :- GraphType
+  [{:keys [spo pos] :as graph} :- GraphType
    node :- s/Any]
   (let [get-object-sets-fn (lowest-level-sets-fn graph)]
     (letfn [(next-nodes [seen n]
@@ -26,7 +26,8 @@
                                     (->> (spo n) vals get-object-sets-fn (apply set/union))
                                     seen)
                     down-connected-entities (set/select entity-node? down-connected)
-                    up-connected (->> (osp n) keys (remove seen) set)]
+                    ;up-connected (->> (osp n) keys (remove seen) set)
+                    up-connected (->> (vals pos) (map #(get % n)) (mapcat keys) (remove seen) set)]
                 (set/union down-connected-entities up-connected)))]
       (loop [nodes #{node} seen #{node}]
         (if-not (seq nodes)
