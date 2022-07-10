@@ -1,5 +1,9 @@
 # Change Log
 
+## WIP
+
+- Allow ID lookup (when creating or referring to new entities with `:id`) to include entities being created in the same transaction
+
 ## [2.3.0] - 2022-03-19
 ### Changed
 - All keywords in the `tg` namespace have been updated to use the `a` namespace. This keeps them short, and makes more sense for the project, which no longer has anything to do with "ThreatGrid".
