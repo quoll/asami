@@ -1,4 +1,4 @@
-(ns ^{:doc "An graph wrapper for seqs"
+(ns ^{:doc "An graph wrapper for an existing graph hybridized with a memory graph"
       :author "Paula Gearon"}
     asami.wrapgraph
   (:require [asami.graph :as gr :refer [Graph graph-add graph-delete graph-diff resolve-triple count-triple]]
