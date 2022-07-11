@@ -74,7 +74,7 @@
   [data s p o]
   (map #(subvseq % 0 3) data))
 
-(defn exists?
+(defn triple-exists?
   "Fast lookup for a statement in an index/graph"
   [graph s p o]
   (some-> (:spo graph) s p o))
@@ -130,7 +130,7 @@
           retracts (transient r)
           change-graph (fn [gr rm-key add-key]
                          (fn [acc [s p o]]
-                           (if (exists? gr s p o)
+                           (if (triple-exists? gr s p o)
                              (assoc acc rm-key (gr/graph-delete (rm-key acc) s p o))
                              (assoc acc add-key (gr/graph-add (add-key acc) s p o tx-id)))))
           graph-remove (change-graph addgraph :addgraph :delgraph)
@@ -153,8 +153,8 @@
                             new-graph-del assertions)]
       (vreset! generated-data (if tx-logging
                                 [(persistent! asserts) (persistent! retracts)]
-                                [(map (fn [[s p o]] (->Datom s p o true)) assertions)
-                                 (map (fn [[s p o]] (->Datom s p o false)) retractions)]))
+                                [(map (fn [[s p o]] (->Datom s p o tx-id true)) assertions)
+                                 (map (fn [[s p o]] (->Datom s p o tx-id false)) retractions)]))
       new-graph))
 
   (graph-diff [this other]

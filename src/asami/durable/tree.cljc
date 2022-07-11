@@ -232,11 +232,6 @@
                              (rebalance-so! side))]
       (assoc new-balance-root :parent parent :side parent-side))))
 
-(defn abs
-  "Returns the absolute value of the number n"
-  [^long n]
-  (if (> 0 n) (- n) n))
-
 (defn neighbor-node
   [side tree node]
   (if-let [child (get-child node tree side)]

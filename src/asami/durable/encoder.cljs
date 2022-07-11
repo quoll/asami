@@ -33,7 +33,9 @@
 
 (defprotocol FlatFile
   (header [this len] "Returns a byte array containing a header")
-  (body [this] "Returns a byte array containing the encoded data"))
+  (body [this] "Returns a byte array containing the encoded data")
+  (encapsulate-id [this] "Returns an ID that encapsulates the type")
+  (comparable [this] "Returns a version of this data that can be compared"))
 
 (defn type-code
   "Returns a code number for an object"
