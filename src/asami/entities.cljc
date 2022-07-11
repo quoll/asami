@@ -210,7 +210,7 @@
                                           (let [eid (ids entity)
                                                 nid (ids id)
                                                 _ (when (and eid nid (not= eid nid)) ;; both IDs have already been mapped, but to different entity ids
-                                                    (throw (ex-info "Entity %s being identified as two separate existing entities [%s] [%s]" (str entity) (str eid) (str nid))))
+                                                    (throw (ex-info (format "Entity %s being identified as two separate existing entities [%s] [%s]" (str entity) (str eid) (str nid)) {:entity entity :tmp1 eid :tmp2 nid})))
                                                 new-id (or eid nid (node/new-node graph)) ;; select the first id found, or else create one
                                                 new-ids (assoc ids entity new-id id new-id) ;; ensure both temporary IDs are mapped to the ID for this entity
                                                 triple (assoc (vec-rest obj) 0 new-id 2 new-id)]
@@ -218,7 +218,7 @@
                                           ;; Ex. `[:db/add :entity :db/id -2]`. Entity already exists. The ID needs to map to it.
                                           (let [new-id (ids id)
                                                 _ (when (and new-id (not= entity new-id))
-                                                    (throw (ex-info "Entity %s being identified as another entity: %s" (str entity) (str new-id))))
+                                                    (throw (ex-info (format "Entity %s being identified as another entity: %s" (str entity) (str new-id)) {:entity entity :tmp new-id})))
                                                 new-ids (if new-id ids (assoc ids id entity))  ;; update the ids map to point id->entity, if it wasn't already there
                                                 triple (assoc (vec-rest obj) 2 entity)]
                                             [(conj acc triple) racc new-ids top-ids]))))))

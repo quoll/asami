@@ -178,7 +178,8 @@
                 (concat [[:a :p3 :z] [:c :p2 :u]])
                 (into #{}))
            r9))))
-(deftest test-change
+
+(deftest test-change-unwrapped
   (let [g' (wrap-graph (assert-data empty-graph data))
         g (graph-transact g' 2 [[:a :p3 :z] [:c :p2 :u]] [[:a :p2 :z] [:c :p4 :t]])
         gu (unwrap-graph g 2)
