@@ -161,7 +161,10 @@
          retractions (mapv (comp (partial mapv ref->id) rest) retract-stmts)
          add-triples (fn [[acc racc ids top-ids :as last-result] obj]
                        (if (and limit (> (count acc) limit))
+                         ;; short circuit introduced for systems where excessively large transactions are filling memory
                          (reduced last-result)
+                         ;; normal insertion
+                         ;; maps are entities to be turned into triples
                          (if (map? obj)
                            (try
                              (let [[triples rtriples new-ids new-top-ids] (entity-triples graph
@@ -174,20 +177,62 @@
                                (if-let [overflow (:overflow (ex-data e))]
                                  (reduced last-result)
                                  (throw e))))
+                           ;; expecting a datom, starting with :db/add. May exentually expect :db/fn
+                           ;; confirm structure
                            (if (and (seqable? obj)
                                     (= 4 (count obj))
                                     (= :db/add (first obj)))
-                             (or
-                              (when (= (nth obj 2) :db/id)
-                                (let [id (nth obj 3)]
-                                  (when (temp-id? id)
-                                    (let [new-id (or (ids id) (node/new-node graph))]
-                                      [(conj acc (assoc (vec-rest obj) 2 new-id))
-                                       racc
-                                       (assoc ids (or id new-id) new-id)
-                                       top-ids]))))
-                              [(conj acc (mapv #(or (ids %) (ref->id %)) (rest obj))) racc ids top-ids])
+                             (let [entity (nth obj 1)
+                                   attribute (nth obj 2)]
+                               (or
+                                ;; Ex.: `[:db/add [:id X] :id X]` that creates a new entity
+                                (when-let [ref (and (writer/lookup-ref? entity)
+                                                    (= (first entity) attribute)
+                                                    entity)]
+                                  (let [new-id (or (ids ref) (node/new-node graph))]
+                                    [(conj acc (assoc (vec-rest obj) 0 new-id)) ;; update the triple to use the id
+                                     racc
+                                     (assoc ids ref new-id) ;; map the entity ref to the id
+                                     top-ids]))
+                                ;; Ex.: `[:db/add -1 :db/id -1]` creating an entity with a negative number temporary id
+                                (when (= attribute :db/id)
+                                  (let [id (nth obj 3)]
+                                    (when (temp-id? id)
+                                      ;; check if the entity and its ID are the same. If not, then handle each case below
+                                      (if (= entity id)
+                                        (let [new-id (or (ids id) (node/new-node graph))
+                                              triple (assoc (vec-rest obj) 0 new-id 2 new-id) ;; update both the first and third positions to the new ID
+                                              new-ids (assoc ids id new-id)]
+                                          [(conj acc triple) racc new-ids top-ids])
+                                        ;; entity node differs from the `:db/id`
+                                        (if (temp-id? entity)
+                                          ;; Ex. `[:db/add -1 :db/id -2]`. Two different temporary IDs. They body need to map to the same entity.
+                                          (let [eid (ids entity)
+                                                nid (ids id)
+                                                _ (when (and eid nid (not= eid nid)) ;; both IDs have already been mapped, but to different entity ids
+                                                    (throw (ex-info "Entity %s being identified as two separate existing entities [%s] [%s]" (str entity) (str eid) (str nid))))
+                                                new-id (or eid nid (node/new-node graph)) ;; select the first id found, or else create one
+                                                new-ids (assoc ids entity new-id id new-id) ;; ensure both temporary IDs are mapped to the ID for this entity
+                                                triple (assoc (vec-rest obj) 0 new-id 2 new-id)]
+                                            [(conj acc triple) racc new-ids top-ids])
+                                          ;; Ex. `[:db/add :entity :db/id -2]`. Entity already exists. The ID needs to map to it.
+                                          (let [new-id (ids id)
+                                                _ (when (and new-id (not= entity new-id))
+                                                    (throw (ex-info "Entity %s being identified as another entity: %s" (str entity) (str new-id))))
+                                                new-ids (if new-id ids (assoc ids id entity))  ;; update the ids map to point id->entity, if it wasn't already there
+                                                triple (assoc (vec-rest obj) 2 entity)]
+                                            [(conj acc triple) racc new-ids top-ids]))))))
+                                (let [[eid new-ids] (if (temp-id? entity)
+                                                      (if-let [new-id (ids entity)]
+                                                        [new-id ids]
+                                                        (let [new-id (node/new-node graph)]
+                                                          [new-id (assoc ids entity new-id)]))
+                                                      [entity ids])
+                                      ;; TODO: update this anonymous fn to look at registered datatypes on `attribute` in the proposed schema
+                                      triple (mapv #(or (new-ids %) (ref->id %)) (rest obj))]
+                                  [(conj acc triple) racc new-ids top-ids])))
                              (throw (ex-info (str "Bad data in transaction: " obj) {:data obj}))))))
          [triples rtriples id-map top-level-ids] (reduce add-triples [[] retractions {} #{}] new-data)
          triples (writer/backtrack-unlink-top-entities top-level-ids triples)]
      [triples rtriples id-map])))
+

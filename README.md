@@ -1,14 +1,14 @@
-# asami [![Build Status](https://travis-ci.org/quoll/asami.svg?branch=main)](https://travis-ci.org/quoll/asami) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+# asami [![Build Status](https://travis-ci.com/quoll/asami.svg?branch=main)](https://travis-ci.com/quoll/asami) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 A graph database, for Clojure and ClojureScript.
 
-The latest version is :
+The latest version is:
 
 [![Clojars Project](http://clojars.org/org.clojars.quoll/asami/latest-version.svg)](http://clojars.org/org.clojars.quoll/asami)
 
 _Asami is now being developed in this repository, as it is no longer being supported at Cisco. The deployment to Clojars has not changed, as it was always to my personal account._
 
-*Note:* _All references to the `:tg/` namespace for keywords have been changed to `:a/` as of 2.3.0. The documentation will be gradually brought up to date to reflect this._
+*Note:* _All references to the `:tg/` namespace for keywords have been changed to `:a/` as of 2.3.0._
 
 ## Goals
 Asami is both similar to and different from other graph databases. Some of the goals of the project are:
@@ -45,7 +45,7 @@ Asami can be made available to clojure by adding the following to a `deps.edn` f
 ```clojure
 {
   :deps {
-    org.clojars.quoll/asami {:mvn/version "2.2.4"}
+    org.clojars.quoll/asami {:mvn/version "2.3.1"}
   }
 }
 ```
@@ -54,7 +54,7 @@ This makes Asami available to a repl that is launched with the `clj` or `clojure
 
 Alternatively, Asami can be added for the Leiningen build tool by adding this to the `:dependencies` section of the `project.clj` file:
 ```clojure
-[org.clojars.quoll/asami "2.2.4"]
+[org.clojars.quoll/asami "2.3.1"]
 ```
 
 ### Important Note for databases before 2.1.0
@@ -123,10 +123,10 @@ Entities found in a query can be extracted back out as objects using the [`entit
 ```clojure
 ;; find the entity IDs. This variation in the :find clause asks for a list of just the ?m variable
 => (d/q '[:find [?m ...] :where [?m :movie/release-year 1995]] db)
-(:tg/node-10327 :tg/node-10326)
+(:a/node-10327 :a/node-10326)
 
 ;; get a single entity
-=> (d/entity db :tg/node-10327)
+=> (d/entity db :a/node-10327)
 #:movie{:title "Toy Story",
         :genre "animation/adventure",
         :release-year 1995}
@@ -245,7 +245,7 @@ Let's find the subgraph from Fred:
 ```
 This returns the _nodes_ in the graph, but not the scalar values. For instance:
 ```clojure
-#{:tg/node-10330 :tg/node-10329 :tg/node-10331 :tg/node-10332}
+#{:a/node-10330 :a/node-10329 :a/node-10331 :a/node-10332}
 ```
 These nodes can be used as the input to a query to get their names:
 ```clojure

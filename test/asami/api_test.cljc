@@ -216,6 +216,48 @@
       (is (= {:person/street "First Street" :person/name "Bob"} bob))
       (is (= {:person/name "Betty" :person/age 43} betty)))))
 
+(deftest test-db-add-with-lookup-ref-creates-entity
+  (let [c (connect "asami:mem://testlrce")
+        {d :db-after} @(transact c {:tx-data [[:db/add [:id "bobid"] :id "bobid"]
+                                              [:db/add [:id "bobid"] :person/name "Bob"]
+                                              [:db/add [:id "bobid"] :person/age 42]
+
+                                              [:db/add [:db/ident "bettyid"] :db/ident "bettyid"]
+                                              [:db/add [:db/ident "bettyid"] :person/name "Betty"]
+                                              [:db/add [:db/ident "bettyid"] :person/age 43]
+                                              [:db/add [:db/ident "bettyid"] :person/friend [:id "bobid"]]]})
+        bob (entity d "bobid")
+        betty (entity d "bettyid" true)
+        bob-node-ref (a/q '[:find ?n . :where [?n :id "bobid"]] d)
+        betty-node-ref (a/q '[:find ?n . :where [?n :db/ident "bettyid"]] d)]
+    (is (keyword? bob-node-ref) "We should end up with a proper node id and not `[:id \"bobid\"]` used as the node id")
+    (is (keyword? betty-node-ref) "We should end up with a proper node id and not `[:db/ident \"bettyid\"]` used as the node id")
+    (is (= {:id "bobid" :person/name "Bob" :person/age 42} bob))
+    (is (= {:person/name "Betty" :person/age 43 :person/friend bob} betty))))
+
+(deftest test-db-add-with-temp-id-creates-entity
+  (let [c (connect "asami:mem://testtidce")
+        {d :db-after ids :tempids} @(transact c {:tx-data [[:db/add -1 :db/id -1]
+                                                           [:db/add -1 :person/name "Bob"]
+                                                           [:db/add -1 :person/age 42]
+
+                                                           [:db/add -2 :db/id -3]
+                                                           [:db/add -2 :person/name "Betty"]
+                                                           [:db/add -3 :person/age 43]
+                                                           [:db/add -3 :person/friend -1]]})
+        {bob-id -1 betty-id -2 betty-ido -3} ids
+        bob (entity d bob-id)
+        betty (entity d betty-id true)
+        bob-node-ref (a/q '[:find ?n . :where [?n :person/name "Bob"]] d)
+        betty-node-ref (a/q '[:find ?n . :where [?n :person/name "Betty"]] d)]
+    (is (= bob-id bob-node-ref) "A negative ID should be mapped to a node after the transaction")
+    (is (= betty-id betty-node-ref) "A negative ID should be mapped to a node after the transaction")
+    (is (= betty-id betty-ido) "Both negative IDs on the same object should map to the node of that object")
+    (is (keyword? bob-node-ref) "We should end up with a proper node id and not `-1` used as the node id")
+    (is (keyword? betty-node-ref) "We should end up with a proper node id and not `-2` or `-3` used as the node id")
+    (is (= {:person/name "Bob" :person/age 42} bob))
+    (is (= {:person/name "Betty" :person/age 43 :person/friend bob} betty))))
+
 (deftest test-entity
   (let [c (connect "asami:mem://test4")
         maksim {:db/id -1
@@ -889,3 +931,8 @@
              {:person/name "Person"})))))
 
 #?(:cljs (run-tests))
+
+(comment
+  ;; Delete all test DBs so that tests can be re-run with a fresh slate
+  (doseq [url (keys @a/connections)]
+    (a/delete-database url)))

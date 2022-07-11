@@ -3,7 +3,8 @@ and multigraph implementations."
       :author "Paula Gearon"}
     asami.common-index
   (:require [asami.datom :as datom :refer [->Datom]]
-            [asami.graph :refer [Graph graph-add graph-delete graph-diff resolve-triple count-triple broad-node-type?]]
+            [asami.graph :as graph :refer [Graph graph-add graph-delete graph-diff resolve-triple
+                                           count-triple broad-node-type?]]
             [asami.internal :as internal]
             [zuko.schema :as st]
             [clojure.set :as set]
@@ -11,6 +12,12 @@ and multigraph implementations."
                :cljs [schema.core :as s :include-macros true]))
   #?(:clj (:import [clojure.lang ITransientCollection])))
 
+(defn subvseq
+  "A subvec wrapper that drops back to sequences when the seq is not a vector"
+  [v a b]
+  (if (vector? v)
+    (subvec v a b)
+    (drop a (take b v))))
 
 (defn graph-transact
   "Common graph transaction operation"
@@ -59,11 +66,11 @@ and multigraph implementations."
 
 (defmethod count-from-index [:v :v :v] [{idx :spo} s p o] (if (get-in idx [s p o]) 1 0))
 (defmethod count-from-index [:v :v  ?] [{idx :spo} s p o] (count (get-in idx [s p])))
-(defmethod count-from-index [:v  ? :v] [{idx :osp} s p o] (count (get-in idx [o s])))
+(defmethod count-from-index [:v  ? :v] [{idx :pos} s p o] (count (filter (fn [os] (some-> os (get o) (get s))) (vals idx))))
 (defmethod count-from-index [:v  ?  ?] [{idx :spo} s p o] (count-embedded-index (idx s)))
 (defmethod count-from-index [ ? :v :v] [{idx :pos} s p o] (count (get-in idx [p o])))
 (defmethod count-from-index [ ? :v  ?] [{idx :pos} s p o] (count-embedded-index (idx p)))
-(defmethod count-from-index [ ?  ? :v] [{idx :osp} s p o] (count-embedded-index (idx o)))
+(defmethod count-from-index [ ?  ? :v] [{idx :pos} s p o] (->> (vals idx) (keep #(get % o)) (map count) (apply +)))
 (defmethod count-from-index [ ?  ?  ?] [{idx :spo} s p o] (apply + (map count-embedded-index (vals idx))))
 
 ;; transitive predicate management
@@ -171,8 +178,9 @@ and multigraph implementations."
   (*stream-from #(apply set/union (get-object-sets-fn (vals (idx %1)))) all-knowns node))
 
 (defn upstream-from
-  [osp all-knowns node]
-  (*stream-from #(set (keys (osp %1))) all-knowns node))
+  [pos all-knowns node]
+  (*stream-from (fn [o] (into #{} (comp (keep #(get % o)) (mapcat keys)) (vals pos)))
+                all-knowns node))
 
 ;; entire graph from a node
 ;; the predicates returned are the first step in the path
@@ -191,12 +199,12 @@ and multigraph implementations."
 
 ;; entire graph that ends at a node
 (defmethod get-transitive-from-index [ ?  ? :v]
-  [{idx :osp pos :pos :as graph} tag s p o]
+  [{pos :pos :as graph} tag s p o]
   (let [get-subjects (lowest-level-fn graph)
         starred (= :star tag)]
     (for [pred (keys pos)
           subj (let [subjs (get-subjects (get-in pos [pred o]))
-                     up-from (and (seq subjs) (reduce (partial upstream-from idx) #{} subjs))]
+                     up-from (and (seq subjs) (reduce (partial upstream-from pos) #{} subjs))]
                  (concat subjs (and (seq up-from) (if starred (conj up-from o) up-from))))]
       [subj pred])))
 
@@ -242,9 +250,7 @@ and multigraph implementations."
 (defmethod get-transitive-from-index [:v  ? :v]
   [{idx :spo :as graph} tag s p o]
   (let [get-objects (lowest-level-fn graph)
-        edges-from (fn [n] ;; finds all property/value pairs from an entity
-                     (let [edge-idx (idx n)]
-                       (for [p (keys edge-idx) o (get-objects (edge-idx p))] [p o])))]
+        edges-from (fn [n] (graph/attribute-values graph n))]
     (get-path-between idx edges-from broad-node-type? tag s o)))
 
 (def sinto (fnil into #{}))
