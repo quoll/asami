@@ -1,8 +1,14 @@
 # Change Log
 
-## WIP
+## [2.3.1] - 2022-07-10
+### Changed
+- Allow ID lookup (when creating or referring to new entities with `:id`) to include entities being created in the same transaction.
+- `:db/add` can now pick up negative IDs as temporary IDs for entities, both in the entity ID and with `:db/id`.
+- Removed a rarely-used index from both in-memory and durable storage, making for faster operations and smaller memory footprint.
 
-- Allow ID lookup (when creating or referring to new entities with `:id`) to include entities being created in the same transaction
+### Added
+- Internal API for hybrid graphs that represent a merge between an existing immutable graph and an in-memory updatable graph.
+- Internal API for a graph representation of a seq of triples.
 
 ## [2.3.0] - 2022-03-19
 ### Changed
@@ -317,7 +323,8 @@
 ### Added
 - Introduced Update Annotations
 
-[Unreleased]: https://github.com/quoll/asami/compare/2.3.3...HEAD
+[Unreleased]: https://github.com/quoll/asami/compare/2.3.1...HEAD
+[2.3.1]: https://github.com/quoll/asami/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/quoll/asami/compare/2.2.4...2.3.0
 [2.2.4]: https://github.com/quoll/asami/compare/2.2.3...2.2.4
 [2.2.3]: https://github.com/quoll/asami/compare/2.2.2...2.2.3

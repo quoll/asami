@@ -8,7 +8,7 @@ The latest version is:
 
 _Asami is now being developed in this repository, as it is no longer being supported at Cisco. The deployment to Clojars has not changed, as it was always to my personal account._
 
-*Note:* _All references to the `:tg/` namespace for keywords have been changed to `:a/` as of 2.3.0. The documentation will be gradually brought up to date to reflect this._
+*Note:* _All references to the `:tg/` namespace for keywords have been changed to `:a/` as of 2.3.0._
 
 ## Goals
 Asami is both similar to and different from other graph databases. Some of the goals of the project are:
@@ -45,7 +45,7 @@ Asami can be made available to clojure by adding the following to a `deps.edn` f
 ```clojure
 {
   :deps {
-    org.clojars.quoll/asami {:mvn/version "2.2.4"}
+    org.clojars.quoll/asami {:mvn/version "2.3.1"}
   }
 }
 ```
@@ -54,7 +54,7 @@ This makes Asami available to a repl that is launched with the `clj` or `clojure
 
 Alternatively, Asami can be added for the Leiningen build tool by adding this to the `:dependencies` section of the `project.clj` file:
 ```clojure
-[org.clojars.quoll/asami "2.2.4"]
+[org.clojars.quoll/asami "2.3.1"]
 ```
 
 ### Important Note for databases before 2.1.0
