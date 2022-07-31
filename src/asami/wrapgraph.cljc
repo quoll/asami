@@ -1,4 +1,4 @@
-(ns ^{:doc "An graph wrapper for seqs"
+(ns ^{:doc "An graph wrapper for existing graphs with memory-only updates"
       :author "Paula Gearon"}
     asami.wrapgraph
   (:require [asami.graph :as gr :refer [Graph graph-add graph-delete graph-diff resolve-triple count-triple]]
@@ -89,7 +89,7 @@
   [a b]
   (reduce (fn [g [s p o]] (gr/graph-delete g s p o)) a (gr/resolve-triple b '?s '?p '?o)))
 
-(defrecord GraphWrapper [addgraph delgraph wrapped-graph tx-logging]
+(defrecord GraphWrapper [addgraph delgraph wrapped-graph tx-logging last-tx]
   Graph
   (new-graph [this] (gr/new-graph wrapped-graph))
 
@@ -100,25 +100,33 @@
     (log/trace "wrap insert: " [subj pred obj tx])
     (if (seq (gr/resolve-triple delgraph subj pred obj))
       ;; deleted statements can just be undeleted. They keep their old statement ID
-      (assoc this :delgraph (gr/graph-delete delgraph subj pred obj))
+      (assoc this
+             :delgraph (gr/graph-delete delgraph subj pred obj)
+             :last-tx tx)
       ;; only check if a statement exists if transactions are being logged
       (if (and tx-logging (seq (gr/resolve-triple wrapped-graph subj pred obj)))
         ;; the statement exists in the wrapped storage. Don't reinsert
-        this
+        (assoc this :last-tx tx)
         ;; add the statement to in-memory storage
-        (assoc this :addgraph (gr/graph-add addgraph subj pred obj tx)))))
+        (assoc this
+               :addgraph (gr/graph-add addgraph subj pred obj tx)
+               :last-tx tx))))
 
   (graph-delete [this subj pred obj]
     (log/trace "delete " [subj pred obj])
     (if (seq (gr/resolve-triple addgraph subj pred obj))
       ;; added statements can be removed from the in-memory graph
-      (assoc this :addgraph (gr/graph-delete addgraph subj pred obj))
+      (assoc this
+             :addgraph (gr/graph-delete addgraph subj pred obj)
+             :last-tx gr/*default-tx-id*)
       ;; only check if a statement already exists if transactions are being logged
       (if (and tx-logging (seq (gr/resolve-triple wrapped-graph subj pred obj)))
         ;; the statement does not exist in wrapped storage. Don't retract it.
-        this
+        (assoc this :last-tx gr/*default-tx-id*)
         ;; remove the statement from in-memory storage. TX ids are not relevant on the delgraph
-        (assoc this :delgraph (gr/graph-add delgraph subj pred obj nil)))))
+        (assoc this
+               :delgraph (gr/graph-add delgraph subj pred obj nil)
+               :last-tx gr/*default-tx-id*))))
 
   (graph-transact [this tx-id assertions retractions]
     (gr/graph-transact this tx-id assertions retractions (volatile! [[] [] {}])))
@@ -155,7 +163,7 @@
                                 [(persistent! asserts) (persistent! retracts)]
                                 [(map (fn [[s p o]] (->Datom s p o tx-id true)) assertions)
                                  (map (fn [[s p o]] (->Datom s p o tx-id false)) retractions)]))
-      new-graph))
+      (assoc new-graph :last-tx tx-id)))
 
   (graph-diff [this other]
     (if (= other wrapped-graph)
@@ -184,9 +192,9 @@
 
 (defn wrap-graph
   "Wraps a given graph with in-memory operations"
-  [existing-graph]
+  [existing-graph tx-id]
   (->GraphWrapper mem/empty-graph mem/empty-graph
-                  existing-graph (get-logging)))
+                  existing-graph (get-logging) tx-id))
 
 (defn unwrap-graph
   "Merges a wrapped graph with the in-memory data used to wrap it."

@@ -56,23 +56,25 @@
     (is (empty? r8))
     (is (= (into #{} data) r9))))
 
+(defn wrap-graph-tx [data] (wrap-graph data 1))
+
 (deftest test-wrap-empty
-  (do-load-test (assert-data (wrap-graph empty-graph) data)))
+  (do-load-test (assert-data (wrap-graph empty-graph 0) data)))
 
 (deftest test-wrap-full
-  (do-load-test (wrap-graph (assert-data empty-graph data))))
+  (do-load-test (wrap-graph-tx (assert-data empty-graph data))))
 
 (deftest test-wrap-insert
   (->> (take 4 data)
        (assert-data empty-graph)
-       wrap-graph
+       wrap-graph-tx
        (#(assert-data % (drop 4 data)))
        do-load-test))
 
 (deftest test-wrap-2insert
   (->> (take 4 data)
        (assert-data empty-graph)
-       wrap-graph
+       wrap-graph-tx
        (#(assert-data % (take 2 (drop 4 data))))
        (#(assert-data % (drop 6 data)))
        do-load-test))
@@ -98,28 +100,28 @@
     (is (= 8 r9))))
 
 (deftest test-count-wrap-empty
-  (do-test-count (assert-data (wrap-graph empty-graph) data)))
+  (do-test-count (assert-data (wrap-graph empty-graph 0) data)))
 
 (deftest test-count-wrap-full
-  (do-test-count (wrap-graph (assert-data empty-graph data))))
+  (do-test-count (wrap-graph-tx (assert-data empty-graph data))))
 
 (deftest test-count-wrap-insert
   (->> (take 4 data)
        (assert-data empty-graph)
-       wrap-graph
+       wrap-graph-tx
        (#(assert-data % (drop 4 data)))
        do-test-count))
 
 (deftest test-count-wrap-2insert
   (->> (take 4 data)
        (assert-data empty-graph)
-       wrap-graph
+       wrap-graph-tx
        (#(assert-data % (take 2 (drop 4 data))))
        (#(assert-data % (drop 6 data)))
        do-test-count))
 
 (deftest test-delete
-  (let [g' (wrap-graph (assert-data empty-graph data))
+  (let [g' (wrap-graph (assert-data empty-graph data) 0)
         g (graph-transact g' 2 [] [[:a :p2 :z] [:c :p4 :t]])
         r1 (unordered-resolve g '[:a ?a ?b])
         r2 (unordered-resolve g '[?a :p2 ?b])
@@ -147,7 +149,7 @@
     (is (= (into #{} (remove #{[:a :p2 :z] [:c :p4 :t]} data)) r9))))
 
 (deftest test-change
-  (let [g' (wrap-graph (assert-data empty-graph data))
+  (let [g' (wrap-graph-tx (assert-data empty-graph data))
         g (graph-transact g' 2 [[:a :p3 :z] [:c :p2 :u]] [[:a :p2 :z] [:c :p4 :t]])
         r1 (unordered-resolve g '[:a ?a ?b])
         r2 (unordered-resolve g '[?a :p2 ?b])
@@ -180,7 +182,7 @@
            r9))))
 
 (deftest test-change-unwrapped
-  (let [g' (wrap-graph (assert-data empty-graph data))
+  (let [g' (wrap-graph-tx (assert-data empty-graph data))
         g (graph-transact g' 2 [[:a :p3 :z] [:c :p2 :u]] [[:a :p2 :z] [:c :p4 :t]])
         gu (unwrap-graph g 2)
         r (unordered-resolve g '[?a ?b ?c])

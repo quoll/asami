@@ -12,13 +12,15 @@
   (db [this] "Retrieves the latest database from this connection")
   (delete-database [this] "Removes all resources for a given connection")
   (release [this] "Releases the resources associated with this connection")
-  (transact-update [this update-fn] "Updates a graph in the database with the provided function.
-                                     Function args are connection and transaction-id")
-  (transact-data
+  ;; The following functions change the state of the connection
+  (transact-update! [this update-fn] "Updates a graph in the database with the provided function.
+                                      Function args are connection and transaction-id")
+  (transact-data!
     [this updates! asserts retracts]
     [this updates! generator-fn] "Updates the database with provided data"))
 
 (defprotocol Database
+  (last-tx [this] "Retrieves the most recent tx-id")
   (as-of [this t] "Retrieves a database as of a given moment, inclusive")
   (as-of-t [this] "Returns the t point for a database")
   (as-of-time [this] "Returns the timestamp associated with a database")
@@ -33,4 +35,7 @@
 
 (def DatabaseType (s/pred #(satisfies? Database %)))
 (def ConnectionType (s/pred #(satisfies? Connection %)))
+
+(def DBsBeforeAfter [(s/one DatabaseType "The database before an operation")
+                     (s/one DatabaseType "The database after an operation")])
 

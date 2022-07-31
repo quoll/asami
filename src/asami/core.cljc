@@ -202,7 +202,7 @@
   (let [{:keys [tx-data tx-triples executor update-fn input-limit]} (if (map? tx-info) tx-info {})
         op (if update-fn
              (fn []
-               (let [[db-before db-after] (storage/transact-update connection update-fn)]
+               (let [[db-before db-after] (storage/transact-update! connection update-fn)]
                  {:db-before db-before
                   :db-after db-after}))
              (fn []
@@ -216,20 +216,20 @@
                      generated-data (volatile! [[] []]) ;; volatile to capture the asserted and retracted data in a transaction
                      [db-before db-after] (if tx-triples
                                             ;; simple assertion of triples
-                                            (storage/transact-data connection generated-data (seq-wrapper tx-triples) nil)
+                                            (storage/transact-data! connection generated-data (seq-wrapper tx-triples) nil)
                                             ;; a seq of statements and/or entities
                                             ;; convert these to assertions/retractions and send to transaction
                                             ;; also, capture tempids that are generated during conversion
-                                            (storage/transact-data connection
-                                                                   generated-data
-                                                                   (fn [graph]
-                                                                     ;; building triples returns a tuple of assertions, retractions, tempids
-                                                                     (let [[_ _ tempids :as result]
-                                                                           (entities/build-triples graph
-                                                                                                   (seq-wrapper (or tx-data tx-info))
-                                                                                                   input-limit)]
-                                                                       (vreset! vtempids tempids)
-                                                                       result))))
+                                            (storage/transact-data! connection
+                                                                    generated-data
+                                                                    (fn [graph]
+                                                                      ;; building triples returns a tuple of assertions, retractions, tempids
+                                                                      (let [[_ _ tempids :as result]
+                                                                            (entities/build-triples graph
+                                                                                                    (seq-wrapper (or tx-data tx-info))
+                                                                                                    input-limit)]
+                                                                        (vreset! vtempids tempids)
+                                                                        result))))
                      ;; pull out the info captured during the transaction
                      [triples retracts] (deref generated-data)]
                  {:db-before db-before

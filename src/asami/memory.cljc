@@ -1,7 +1,7 @@
 (ns ^{:doc "A storage implementation over in-memory indexing."
       :author "Paula Gearon"}
     asami.memory
-    (:require [asami.storage :as storage :refer [ConnectionType DatabaseType UpdateData]]
+    (:require [asami.storage :as storage :refer [ConnectionType DatabaseType UpdateData DBsBeforeAfter]]
               [asami.internal :refer [now instant? to-timestamp]]
               [asami.index :as mem]
               [asami.multi-graph :as multi]
@@ -37,7 +37,7 @@
 
 
 (declare as-of* as-of-t* as-of-time* since* since-t* graph* entity*
-         get-url* next-tx* db* delete-database* transact-update* transact-data*)
+         get-url* next-tx* db* delete-database* transact-update*! transact-data*!)
 
 ;; graph is the wrapped graph
 ;; history is a seq of Databases, excluding this one
@@ -45,6 +45,7 @@
 (defrecord MemoryDatabase [graph history timestamp t]
   storage/Database
 
+  (db-tx [this] (count history))
   (as-of [this t] (as-of* this t))
   (as-of-t [this] (as-of-t* this))
   (as-of-time [this] (as-of-time* this))
@@ -65,9 +66,9 @@
   (db [this] (db* this))
   (delete-database [this] (delete-database* this))
   (release [this]) ;; no-op for memory databases
-  (transact-update [this update-fn] (transact-update* this update-fn))
-  (transact-data [this updates! asserts retracts] (transact-data* this updates! asserts retracts))
-  (transact-data [this updates! generator-fn] (transact-data* this updates! generator-fn)))
+  (transact-update! [this update-fn] (transact-update*! this update-fn))
+  (transact-data! [this updates! asserts retracts] (transact-data*! this updates! asserts retracts))
+  (transact-data! [this updates! generator-fn] (transact-data*! this updates! generator-fn)))
 
 
 (def empty-graph mem/empty-graph)
@@ -91,7 +92,7 @@
 
 (s/defn next-tx* :- s/Num
   [connection :- ConnectionType]
-  (count (:history @(:state connection))))
+  (storage/db-tx @(:state connection)))
 
 (s/defn db* :- DatabaseType
   "Retrieves the most recent value of the database for reading."
@@ -167,10 +168,7 @@
   [database :- DatabaseType]
   (:graph database))
 
-(def DBsBeforeAfter [(s/one DatabaseType "The database before an operation")
-                     (s/one DatabaseType "The database after an operation")])
-
-(s/defn transact-update* :- DBsBeforeAfter
+(s/defn transact-update*! :- DBsBeforeAfter
   "Updates a graph with a function, updating the connection to the new graph.
   The function accepts a graph and a transaction ID.
   Returns a triple containing the old database, the new one, and any adjunect data the statement generator may have created."
@@ -187,21 +185,21 @@
                          :history (conj (:history db-after) db-after)})))]
     [db-before db-after]))
 
-(s/defn transact-data* :- DBsBeforeAfter
+(s/defn transact-data*! :- DBsBeforeAfter
   "Removes a series of tuples from the latest graph, and asserts new tuples into the graph.
    Updates the connection to the new graph."
   ([conn :- ConnectionType
     updates! :- UpdateData
     asserts :- [Triple]   ;; triples to insert
     retracts :- [Triple]] ;; triples to remove
-   (transact-update* conn (fn [graph tx-id] (gr/graph-transact graph tx-id asserts retracts updates!))))
+   (transact-update*! conn (fn [graph tx-id] (gr/graph-transact graph tx-id asserts retracts updates!))))
   ([conn :- ConnectionType
     updates! :- UpdateData
     generator-fn]
-   (transact-update* conn
-                     (fn [graph tx-id]
-                       (let [[asserts retracts] (generator-fn graph)]
-                         (gr/graph-transact graph tx-id asserts retracts updates!))))))
+   (transact-update*! conn
+                      (fn [graph tx-id]
+                        (let [[asserts retracts] (generator-fn graph)]
+                          (gr/graph-transact graph tx-id asserts retracts updates!))))))
 
 
 (s/defn entity* :- (s/maybe {s/Any s/Any})

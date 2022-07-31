@@ -189,7 +189,7 @@
 ;; Update functions return a Graph, and accept a Graph and an integer
 (def UpdateFunction (s/=> GraphType GraphType s/Int))
 
-(s/defn transact-update* :- DBsBeforeAfter
+(s/defn transact-update*! :- DBsBeforeAfter
   "Updates a graph according to a provided function. This will be done in a new, single transaction."
   [{:keys [tx-manager grapha nodea] :as connection} :- ConnectionType
    update-fn :- UpdateFunction]
@@ -220,18 +220,18 @@
           ;; return the required database values
           [db-before (->DurableDatabase connection graph-after tx-id new-timestamp)])))))
 
-(s/defn transact-data* :- DBsBeforeAfter
+(s/defn transact-data*! :- DBsBeforeAfter
   "Removes a series of tuples from the latest graph, and asserts new tuples into the graph.
    Updates the connection to the new graph."
   ([conn :- ConnectionType
     updates! :- UpdateData
     asserts :- [Triple]   ;; triples to insert
     retracts :- [Triple]] ;; triples to remove
-   (transact-update* conn (fn [graph tx-id] (graph/graph-transact graph tx-id asserts retracts updates!))))
+   (transact-update*! conn (fn [graph tx-id] (graph/graph-transact graph tx-id asserts retracts updates!))))
   ([conn :- ConnectionType
     updates! :- UpdateData
     generator-fn]
-   (transact-update* conn
+   (transact-update*! conn
                      (fn [graph tx-id]
                        (let [[asserts retracts] (generator-fn graph)]
                          (graph/graph-transact graph tx-id asserts retracts updates!))))))
@@ -248,9 +248,9 @@
   (db [this] (db* this))
   (delete-database [this] (delete-database* this))
   (release [this] (release* this))
-  (transact-update [this update-fn] (transact-update* this update-fn))
-  (transact-data [this updates! asserts retracts] (transact-data* this updates! asserts retracts))
-  (transact-data [this updates! generator-fn] (transact-data* this updates! generator-fn))
+  (transact-update! [this update-fn] (transact-update*! this update-fn))
+  (transact-data! [this updates! asserts retracts] (transact-data*! this updates! asserts retracts))
+  (transact-data! [this updates! generator-fn] (transact-data*! this updates! generator-fn))
   common/Lockable
   (lock! [this] #?(:clj (.lock ^Lock lock)))
   (unlock! [this] #?(:clj (.unlock ^Lock lock))))
