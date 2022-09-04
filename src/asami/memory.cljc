@@ -45,7 +45,7 @@
 (defrecord MemoryDatabase [graph history timestamp t]
   storage/Database
 
-  (db-tx [this] (count history))
+  (last-tx [this] (count history))
   (as-of [this t] (as-of* this t))
   (as-of-t [this] (as-of-t* this))
   (as-of-time [this] (as-of-time* this))
@@ -92,7 +92,7 @@
 
 (s/defn next-tx* :- s/Num
   [connection :- ConnectionType]
-  (storage/db-tx @(:state connection)))
+  (storage/last-tx @(:state connection)))
 
 (s/defn db* :- DatabaseType
   "Retrieves the most recent value of the database for reading."
