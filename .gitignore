@@ -10,3 +10,12 @@ pom.xml.asc
 .hgignore
 .hg/
 /.cpcache
+cleanup.sh
+out
+profile.sh
+\#*\#
+/tmpdata
+.dir-locals.el
+/.scratch
+/demo
+/tmp
