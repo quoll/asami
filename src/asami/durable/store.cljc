@@ -144,6 +144,8 @@
 
 (defrecord DurableDatabase [connection bgraph t timestamp]
   storage/Database
+  (last-timestamp [this] timestamp)
+  (last-tx [this] t)
   (as-of [this t-val] (as-of* this t-val))
   (as-of-t [this] t)
   (as-of-time [this] timestamp)

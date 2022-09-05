@@ -46,6 +46,7 @@
 (defrecord MemoryDatabase [graph history timestamp t]
   storage/Database
 
+  (last-timestamp [this] timestamp)
   (last-tx [this] (count history))
   (as-of [this t] (as-of* this t))
   (as-of-t [this] (as-of-t* this))
@@ -223,7 +224,7 @@
   (db [this] wdb)
   (delete-database [this])
   (release [this])
-  (transact-update! [this update-fn] (storage/transact-update! wrapped))
+  (transact-update! [this update-fn] (storage/transact-update! wrapped update-fn))
   (transact-data! [this updates! asserts retracts]
     (storage/transact-data! wrapped updates! asserts retracts))
   (transact-data! [this updates! generator-fn]

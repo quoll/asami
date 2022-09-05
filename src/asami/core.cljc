@@ -296,13 +296,13 @@
       tx-info :- TransactData]
      (transact-async connection tx-info)))
 
-(defn with
+(s/defn with
   "Performs a transaction against a database, with all changes in memory, instead of on the original database.
   This really only affect durable databases.
   Takes and returns the same data structures as `transact`."
   [connection :- ConnectionType
    tx-info :- TransactData]
-  (transact (with-wrap connection) tx-info))
+  (transact (storage/with-wrap connection) tx-info))
 
 (defn- graphs-of
   "Converts Database objects to the graph that they wrap. Other arguments are returned unmodified."

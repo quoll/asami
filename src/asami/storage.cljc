@@ -21,6 +21,7 @@
   (with-wrap [this] "Creates a connection that can be transacted upon only in memory."))
 
 (defprotocol Database
+  (last-timestamp [this] "Retrieves the most recent timestamp")
   (last-tx [this] "Retrieves the most recent tx-id")
   (as-of [this t] "Retrieves a database as of a given moment, inclusive")
   (as-of-t [this] "Returns the t point for a database")
