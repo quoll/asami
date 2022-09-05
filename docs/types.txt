@@ -1,0 +1,22 @@
+type number    Description
+0              long
+1              double
+2              string
+3              raw uri
+4              http uri
+5              https uri
+6              big int
+7              big float
+8              timestamp
+9              keyword
+10             xsd data
+11             blob
+
+
+layout
+| type   |           length                |
+| 4 bits |           28 bits               |
+|  xxxx  | xxxx xxxxxxxx xxxxxxxx xxxxxxxx |
+
+Max length = 256 MB
+

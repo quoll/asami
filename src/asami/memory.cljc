@@ -37,7 +37,8 @@
 
 
 (declare as-of* as-of-t* as-of-time* since* since-t* graph* entity*
-         get-url* next-tx* db* delete-database* transact-update*! transact-data*!)
+         get-url* next-tx* db* delete-database* transact-update*!
+         transact-data*! wrap-connection)
 
 ;; graph is the wrapped graph
 ;; history is a seq of Databases, excluding this one
@@ -68,7 +69,8 @@
   (release [this]) ;; no-op for memory databases
   (transact-update! [this update-fn] (transact-update*! this update-fn))
   (transact-data! [this updates! asserts retracts] (transact-data*! this updates! asserts retracts))
-  (transact-data! [this updates! generator-fn] (transact-data*! this updates! generator-fn)))
+  (transact-data! [this updates! generator-fn] (transact-data*! this updates! generator-fn))
+  (with-wrap [this] (wrap-connection name state)))
 
 
 (def empty-graph mem/empty-graph)
@@ -92,7 +94,7 @@
 
 (s/defn next-tx* :- s/Num
   [connection :- ConnectionType]
-  (storage/last-tx @(:state connection)))
+  (count (:history @(:state connection))))
 
 (s/defn db* :- DatabaseType
   "Retrieves the most recent value of the database for reading."
@@ -178,8 +180,8 @@
         (swap-vals! (:state conn)
                     (fn [state]
                       (let [{:keys [graph db history t] :as db-before} (:db state)
-                            next-tx (count (:history state))
-                            next-graph (update-fn graph next-tx)
+                            nxt-tx (storage/next-tx conn)
+                            next-graph (update-fn graph nxt-tx)
                             db-after (->MemoryDatabase next-graph (conj history db-before) (now) (inc t))]
                         {:db db-after
                          :history (conj (:history db-after) db-after)})))]
@@ -209,3 +211,29 @@
   [{graph :graph :as db} id nested?]
   (reader/ident->entity graph id nested?))
 
+;;;;;;;;;;;;;;;;;;;;
+;; Wrapper interface
+;;;;;;;;;;;;;;;;;;;;
+
+(defrecord MemoryWrapConnection [wrapped nm nxt-tx wdb]
+  storage/Connection
+  (get-name [this] nm)
+  (get-url [this] nil)
+  (next-tx [this] nxt-tx)
+  (db [this] wdb)
+  (delete-database [this])
+  (release [this])
+  (transact-update! [this update-fn] (storage/transact-update! wrapped))
+  (transact-data! [this updates! asserts retracts]
+    (storage/transact-data! wrapped updates! asserts retracts))
+  (transact-data! [this updates! generator-fn]
+    (storage/transact-data! wrapped updates! generator-fn))
+  (with-wrap [this] this))
+
+(defn wrap-connection
+  "Returns a new wrapped connection. This is almost the same as a normal
+  in-memory database, but the connection is no longer attached to the session."
+  [connection]
+  ;; create a wrapped with a copy of the state
+  (->MemoryWrapConnection
+   (assoc connection :state (atom @(:state connection)))))

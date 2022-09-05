@@ -17,7 +17,8 @@
                                       Function args are connection and transaction-id")
   (transact-data!
     [this updates! asserts retracts]
-    [this updates! generator-fn] "Updates the database with provided data"))
+    [this updates! generator-fn] "Updates the database with provided data")
+  (with-wrap [this] "Creates a connection that can be transacted upon only in memory."))
 
 (defprotocol Database
   (last-tx [this] "Retrieves the most recent tx-id")
