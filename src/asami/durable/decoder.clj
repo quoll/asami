@@ -137,7 +137,7 @@
   [ext paged-rdr ^long pos]
   (let [[s len] (string-decoder ext paged-rdr pos)
         sp (s/index-of s \space)]
-    [[(URI/create (subs s 0 sp)) (subs (inc sp))] len]))
+    [[(URI/create (subs s 0 sp)) (subs s (inc sp))] len]))
 
 (defn default-decoder
   "This is a decoder for unsupported data that has a string constructor"

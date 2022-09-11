@@ -347,21 +347,23 @@
        ;; that are not equal to result-cols, reorganize the elements
        ;; of `results` such that they align with `result-cols`.
        (sequence 
-        (comp (map (fn [results cols]
-                     (if (= cols result-cols)
-                       results
-                       (let [cols-index (index cols)
-                             ;; Build a function which maps each
-                             ;; element of a `result` to its location in
-                             ;; `result-cols`.
-                             ;; For any column that appears in `result-cols`
-                             ;; but not the `results`, pad with a `nil`.
-                             reorganize (apply juxt (map (fn [col]
-                                                           (if-some [i (get cols-index col)]
-                                                             (fn [result] (nth result i))
-                                                             (constantly nil)))
-                                                         result-cols))]
-                         (map reorganize results)))))
+        (comp (map
+               #_:clj-kondo/ignore
+               (fn [results cols]
+                 (if (= cols result-cols)
+                   results
+                   (let [cols-index (index cols)
+                         ;; Build a function which maps each
+                         ;; element of a `result` to its location in
+                         ;; `result-cols`.
+                         ;; For any column that appears in `result-cols`
+                         ;; but not the `results`, pad with a `nil`.
+                         reorganize (apply juxt (map (fn [col]
+                                                       (if-some [i (get cols-index col)]
+                                                         (fn [result] (nth result i))
+                                                         (constantly nil)))
+                                                     result-cols))]
+                     (map reorganize results)))))
               cat)
         spread
         spread-cols))

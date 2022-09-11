@@ -23,7 +23,7 @@
      (containsKey [_ i] (if (int? i)
                           (and (<= 0 i) (< i 5))
                           (#{:e :a :v :tx :added} i)))
-     (entryAt [_ i] (nth (as-vec i)))
+     (entryAt [this i] (nth (as-vec this) i))
      (assoc [this k v] (apply ->Datom (assoc (as-vec this) ({:e 0 :a 1 :v 2 :tx 3 :added 4} k k) v)))
      (count [_] 5)
      (cons [this c] (cons c (as-vec this)))
@@ -45,7 +45,7 @@
 #?(:cljs
    (deftype Datom [e a v tx added]
      Vectorizable
-     (as-vec [_] [e a v tx added])
+     (as-vec [_] [e a v tx added]deps/cal)
 
      IAssociative
      (-contains-key? [_ i] (if (integer? i)
@@ -61,13 +61,13 @@
      (equiv [this other]
        (-equiv this other))
      (indexOf [coll x]
-       (-indexOf (as-vec coll) x 0))
+       (#'cljs.core/-indexOf (as-vec coll) x 0))
      (indexOf [coll x start]
-       (-indexOf (as-vec coll) x start))
+       (#'cljs.core/-indexOf (as-vec coll) x start))
      (lastIndexOf [coll x]
-       (-lastIndexOf (as-vec coll) x 5))
+       (#'cljs.core/-lastIndexOf (as-vec coll) x 5))
      (lastIndexOf [coll x start]
-       (-lastIndexOf (as-vec coll) x start))
+       (#'cljs.core/-lastIndexOf (as-vec coll) x start))
 
      ISeqable
      (-seq [coll] (seq (as-vec coll)))

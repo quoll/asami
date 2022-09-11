@@ -13,8 +13,7 @@
   (:require [asami.core :as core]
             [asami.graph :as graph]
             [asami.storage :as storage]
-            [zuko.node :refer [new-node]]
-            [asami.storage :as storage]))
+            [zuko.node :refer [new-node]]))
 
 (defn -connect
   "Connects to a database described in the uri"
