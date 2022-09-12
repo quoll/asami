@@ -79,7 +79,7 @@
    pattern-counts :- {CountablePattern s/Num}
    eval-patterns :- [EvalPattern]]
   (let [smallest-count (apply min (vals pattern-counts))]
-    (s/letfn [(path-through :- [CountablePattern]
+    (s/letfn [(path-through :- [CountablePattern] #_:clj-kondo/ignore
                 [bound :- #{Symbol}
                  rpatterns :- [CountablePattern]
                  binding-outs :- {Var CountablePattern}]
@@ -113,6 +113,7 @@
                                              (min-pattern fully-bound-patterns)
                                              (min-pattern nexts))]
                           (cons next-pattern
+                                #_:clj-kondo/ignore
                                 (path-through (into bound (get-vars next-pattern))
                                               (without next-pattern rpatterns)
                                               binding-outs)))
