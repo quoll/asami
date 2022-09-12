@@ -20,3 +20,4 @@ profile.sh
 /.scratch
 /demo
 /tmp
+.cache

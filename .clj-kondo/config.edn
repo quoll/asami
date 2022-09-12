@@ -1,0 +1,2 @@
+{:lint-as {asami.cache/defcache clojure.core/defrecord} }
+
