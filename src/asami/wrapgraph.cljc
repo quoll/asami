@@ -167,7 +167,8 @@
 
   (graph-diff [this other]
     (if (= other wrapped-graph)
-      (let [filtered-addition-graph (reduce graph-delete addgraph (resolve-triple delgraph '?s '?p '?o))]
+      (let [delete-expand (fn [g [s p o]] (graph-delete g s p o))
+            filtered-addition-graph (reduce delete-expand addgraph (resolve-triple delgraph '?s '?p '?o))]
         (keys (:spo filtered-addition-graph)))
       (throw (ex-info "Unsupported operation" {:operation :graph-diff}))))
 

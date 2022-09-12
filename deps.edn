@@ -1,6 +1,6 @@
 ;; NOTE: This file is only used for development. Dependencies here are not Asami dependencies.
 {:deps
- {org.clojure/clojurescript {:mvn/version "1.10.879"}
+ {org.clojure/clojurescript {:mvn/version "1.11.60"}
   org.clojure/clojure {:mvn/version "1.11.1"}
   prismatic/schema {:mvn/version "1.1.12"} 
   org.clojure/core.cache {:mvn/version "1.0.217"}

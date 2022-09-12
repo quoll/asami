@@ -116,7 +116,8 @@
         current-file-size (file-size block-file)
         new-file-size (+ (* (dec regions) stride) stride)
         _ (when (< current-file-size mapped-size)
-            (throw (ex-info (str "File has shrunk: " (:file block-file)))))
+            (throw (ex-info (str "File has shrunk: " (:file block-file)) {:file-size current-file-size
+                                                                          :expected-size mapped-size})))
         block-file (if (> current-file-size new-file-size)
                      (set-length! block-file new-file-size)
                      block-file)]
@@ -172,7 +173,7 @@
     (.position ^ByteBuffer ro (int byte-offset))
     (.position new-buffer (int new-byte-offset))
     (.put new-buffer ^ByteBuffer ro)
-    (create-block block-size new-byte-offset new-buffer)))
+    (create-block new-block-id block-size new-byte-offset new-buffer)))
 
 (defn unmap
   "Throw away mappings. This is dangerous, as it invalidates all instances.

@@ -85,7 +85,7 @@
     (throw (ex-info "Unsupported Operation" {:cause "Read Only" :operation "write"})))
 
   (at [this new-root-id]
-    (->ReadOnlyPool data (tree/at index new-root-id) new-root-id)))
+    (->ReadOnlyPool data (tree/at index new-root-id) new-root-id cache)))
 
 (defrecord DataPool [data index root-id cache]
   DataStorage

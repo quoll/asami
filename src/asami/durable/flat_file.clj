@@ -115,7 +115,7 @@
                     (if (< attempt 1)
                       (do
                         (refresh! this)
-                        (recur 1))
+                        #_:clj-kondo/ignore (recur 1))
                       (throw (ex-info "Accessing trailing data beyond the end of file"
                                       {:region-size region-size :region-offset region-offset})))
                     
@@ -132,7 +132,7 @@
                             (if (< attempt 1)
                               (do
                                 (refresh! this)
-                                (recur 1))
+                                #_:clj-kondo/ignore (recur 1))
                               (throw (ex-info "Accessing data beyond the end of file"
                                               {:size nslice-size :limit (.capacity ^ByteBuffer nregion)})))
                             (do

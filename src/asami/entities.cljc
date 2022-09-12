@@ -11,6 +11,11 @@
               #?(:clj  [schema.core :as s]
                  :cljs [schema.core :as s :include-macros true])))
 
+#?(:cljs
+   (defn format
+     "An ersatz format for ClojureScript"
+     [s & args]
+     (apply str (interleave (s/split s #"%[sd]") args))))
 
 (defn ^:private annotated-attribute?
   "Checks if an attribute has been annotated with a character"
@@ -218,7 +223,8 @@
                                           ;; Ex. `[:db/add :entity :db/id -2]`. Entity already exists. The ID needs to map to it.
                                           (let [new-id (ids id)
                                                 _ (when (and new-id (not= entity new-id))
-                                                    (throw (ex-info (format "Entity %s being identified as another entity: %s" (str entity) (str new-id)) {:entity entity :tmp new-id})))
+                                                    (throw (ex-info (format "Entity %s being identified as another entity: %s" (str entity) (str new-id))
+                                                                    {:entity entity :tmp new-id})))
                                                 new-ids (if new-id ids (assoc ids id entity))  ;; update the ids map to point id->entity, if it wasn't already there
                                                 triple (assoc (vec-rest obj) 2 entity)]
                                             [(conj acc triple) racc new-ids top-ids]))))))
