@@ -387,7 +387,7 @@
 
 (def not-operation? "Returns true if a pattern is a NOT operation" (partial opt-type? #{'not 'NOT}))
 
-(def opt-operation? "Returns true if a pattern is a NOT operation" (partial opt-type? #{'optional 'OPTIONAL}))
+(def opt-operation? "Returns true if a pattern is a OPTIONAL operation" (partial opt-type? #{'optional 'OPTIONAL}))
 
 (s/defn extract-patterns-by-type :- {s/Keyword [PatternOrBindings]}
   "Categorizes elements of a WHERE clause, returning a keyword map"
