@@ -167,11 +167,12 @@
 (s/defn delete-database*
   "Delete the graph, which will recursively delete all resources"
   [{:keys [name grapha tx-manager] :as connection} :- ConnectionType]
-  (close @grapha)
-  (delete! @grapha)
-  (reset! grapha nil)
-  (close tx-manager)
-  (delete! tx-manager)
+  (when @grapha
+    (close @grapha)
+    (delete! @grapha)
+    (reset! grapha nil)
+    (close tx-manager)
+    (delete! tx-manager))
   #?(:clj (when-let [d (common-utils/get-directory name)]
             (.delete ^File d))
      :cljs true))
@@ -179,9 +180,10 @@
 (s/defn release*
   "Closes the transaction manager, and the graph, which will recursively close all resources"
   [{:keys [name grapha tx-manager] :as connection} :- ConnectionType]
-  (close @grapha)
-  (reset! grapha nil)
-  (close tx-manager))
+  (when @grapha
+    (close @grapha)
+    (reset! grapha nil)
+    (close tx-manager)))
 
 (def DBsBeforeAfter [(s/one DatabaseType "db-before")
                     (s/one DatabaseType "db-after")])
@@ -242,6 +244,7 @@
 
 (defrecord DurableConnection [name tx-manager grapha nodea lock]
   storage/Connection
+  (open? [this] (boolean @grapha))
   (get-name [this] name)
   (get-url [this] (get-url* this))
   (next-tx [this] (common/tx-count tx-manager))

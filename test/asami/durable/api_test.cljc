@@ -1,7 +1,7 @@
 (ns asami.durable.api-test
   "Tests the public query functionality on the durable store"
-  (:require [asami.core :refer [q show-plan create-database connect db transact delete-database
-                                entity as-of since import-data export-data]]
+  (:require [asami.core :as a :refer [q show-plan create-database connect db transact delete-database
+                                      release entity as-of since import-data export-data]]
             [asami.index :as i]
             [asami.multi-graph :as m]
             [asami.internal :refer [now]]
@@ -178,6 +178,44 @@
              (q '[:find ?e ?a ?v :where [?e ?a ?v]] (:db-after r2))))))
   (delete-database "asami:local://testr")
   (delete-database "asami:local://testr2"))
+
+(def io-entities
+  [{:db/ident "charles"
+    :name "Charles"
+    :home {:db/ident "scarborough"
+           :town "Scarborough"
+           :county "Yorkshire"}}
+   {:db/ident "jane"
+    :name "Jane"
+    :home {:db/ident "scarborough"}}])
+
+(deftest test-release
+  (testing "Are databases released correctly"
+    (let [db-name "asami:local://test-rel"
+          conn (connect db-name)
+          {d :db-after} @(transact conn {:tx-data io-entities})
+          r (set (q '[:find ?e ?a ?v :where [?e ?a ?v]] d))]
+      (is (= 13 (count r)))
+
+      (release db-name)
+      (is (nil? (get @a/connections db-name)))
+
+      (let [conn2 (connect db-name)
+            {dx2 :db-after} @(transact conn2 {:tx-triples [[:mem/node-1 :property "a"]
+                                                           [:mem/node-2 :property "b"]
+                                                           [:mem/node-3 :property "c"]]})
+            rx2 (q '[:find ?e ?a ?v :where [?e ?a ?v]] dx2)]
+        ;; updating the old connection after retrieving a new one will fail
+        (is (thrown-with-msg? ExceptionInfo #"Database closed"
+                              @(transact conn {:tx-triples [[:mem/node-4 :property "value"]
+                                                            [:mem/node-5 :property "other"]]})))
+
+        (release conn2)
+        (is (nil? (get @a/connections db-name)))
+        ;; does transacting into a detached database work?
+        (is (thrown-with-msg? ExceptionInfo #"Database closed" @(transact conn2 {:tx-triples [[:mem/node-6 :property "d"]]})))
+        (is (nil? (get @a/connections db-name)))))
+    (delete-database "asami:local://test-rel")))
 
 (deftest test-entity
   (let [c (connect "asami:local://test4")

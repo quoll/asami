@@ -45,7 +45,7 @@
 #?(:cljs
    (deftype Datom [e a v tx added]
      Vectorizable
-     (as-vec [_] [e a v tx added]deps/cal)
+     (as-vec [_] [e a v tx added])
 
      IAssociative
      (-contains-key? [_ i] (if (integer? i)

@@ -1,6 +1,6 @@
 (ns asami.api-test
   "Tests the public query functionality"
-  (:require [asami.core :as a :refer [q show-plan create-database connect db transact
+  (:require [asami.core :as a :refer [q show-plan create-database connect db transact release
                                       entity as-of since import-data export-data delete-database]]
             [asami.index :as i]
             [asami.graph :as graph]
@@ -886,6 +886,39 @@
           ;; is it now reattached?
           (is (identical? conn2 (get @a/connections db-name)))
           (is (= 1 (count rx2))))))))
+
+(deftest test-release
+  (testing "Are released memory databases cleared"
+    (let [db-name "asami:mem://test-rel"
+          conn (connect db-name)
+          {d :db-after} @(transact conn {:tx-data io-entities})
+          r (set (q '[:find ?e ?a ?v :where [?e ?a ?v]] d))]
+      (is (= 13 (count r)))
+
+      (release db-name)
+      (is (nil? (get @a/connections db-name)))
+
+      ;; old graph is lost and a new one is created
+      (let [conn2 (connect db-name)
+            {dx2 :db-after} @(transact conn2 {:tx-triples [[:mem/node-1 :property "a"]
+                                                           [:mem/node-2 :property "b"]
+                                                           [:mem/node-3 :property "c"]]})
+            rx2 (q '[:find ?e ?a ?v :where [?e ?a ?v]] dx2)]
+        ;; updating the old connection after retrieving a new one will fail
+        (is (thrown-with-msg? ExceptionInfo #"Updating a detached connection"
+                              @(transact conn {:tx-triples [[:mem/node-4 :property "value"]
+                                                            [:mem/node-5 :property "other"]]})))
+
+        (release conn2)
+        (is (nil? (get @a/connections db-name)))
+        ;; does transacting into a detached database work?
+        (let [{dx2 :db-after} @(transact conn2 {:tx-triples [[:mem/node-6 :property "d"]]})
+              rx2 (q '[:find ?e ?a ?v :where [?e ?a ?v]] dx2)]
+          ;; is it now reattached?
+          (is (identical? conn2 (get @a/connections db-name)))
+          ;; releasing removes resources, but there were none to remove
+          ;; all data should be in the graph that was attached in the second open
+          (is (= 4 (count rx2))))))))
 
 (deftest test-update-unowned
   (testing "Doing an update on an attribute that references a top level entity"

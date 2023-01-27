@@ -5,6 +5,7 @@
                  :cljs [schema.core :as s :include-macros true])))
 
 (defprotocol Connection
+  (open? [this] "Returns true when the database is open and available")
   (get-name [this] "Retrieves the name of the database")
   (get-url [this] "Retrieves the url of the database. Based on the name.")
   (next-tx [this] "Returns the next transaction ID that this connection will use")

@@ -59,6 +59,7 @@
 ;; :history is a list of tuples of Database, including db
 (defrecord MemoryConnection [name state]
   storage/Connection
+  (open? [this] true)
   (get-name [this] name)
   (get-url [this] (get-url* this))
   (next-tx [this] (next-tx* this))

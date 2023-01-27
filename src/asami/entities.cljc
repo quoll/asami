@@ -6,6 +6,7 @@
               [asami.graph :as gr]
               [asami.entities.general :refer [EntityMap GraphType]]
               [asami.entities.writer :as writer :refer [Triple]]
+              #?(:cljs [clojure.string :as string])
               [zuko.util :as util]
               [zuko.node :as node]
               #?(:clj  [schema.core :as s]
@@ -15,7 +16,7 @@
    (defn format
      "An ersatz format for ClojureScript"
      [s & args]
-     (apply str (interleave (s/split s #"%[sd]") args))))
+     (apply str (interleave (string/split s #"%[sd]") args))))
 
 (defn ^:private annotated-attribute?
   "Checks if an attribute has been annotated with a character"

@@ -96,7 +96,7 @@
        (if-let [conn (connection-for uri)]
          (storage/delete-database conn))))))
 
-(s/defschema StringOrConnection (s/if string? String ConnectionType))
+(s/defschema StringOrConnection (s/if string? s/Str ConnectionType))
 
 (s/defn release
  [conn :- StringOrConnection]
@@ -106,8 +106,13 @@
      (storage/release c))
    (do
      ;; if the connection is known then remove it
-     (when-let [u (ffirst (filter #(identical? conn (second %)) @connections))]
-       (swap! connections dissoc u))
+     (when-let [url (storage/get-url conn)]
+       (swap! connections dissoc url)
+       ;; if a different version of this connection was in storage, then remove it too
+       (when-let [c (@connections url)]
+         (when-not (identical? c conn)
+           (storage/release c))))
+     ;; release the connection
      (storage/release conn))))
 
 (s/defn get-database-names
@@ -143,9 +148,12 @@
 
 (defn check-attachment
   "Checks if a connection is attached to the connections map.
-   If not, then connect. Returns the connection if previously connected,
-   false if it needed to be reconnected."
+   If not, then reconnect if still open. Returns the connection if previously connected,
+   false if it needed to be reconnected.
+   Throws an exception if the graph is closed."
   [connection]
+  (when-not (storage/open? connection)
+    (throw (ex-info "Database closed" {:open false})))
   (let [url (storage/get-url connection)
         c (@connections url)]
     (if (nil? c)

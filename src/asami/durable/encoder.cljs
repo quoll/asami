@@ -156,4 +156,3 @@
   (let [b (body o)]
     [(header o (.-length b)) b]))
 
-(defn encapsulate-id [x])
