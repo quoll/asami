@@ -19,9 +19,12 @@
 (defonce connections (atom {}))
 
 (defn shutdown
-  "Releases all connection resources for a clean shutdown"
+  "Releases all connection resources for a clean shutdown.
+  This should only be called during shutdown, and not if further database access is desired."
   []
-  (doseq [connection (vals @connections)] (storage/release connection)))
+  (doseq [connection (vals @connections)]
+    (storage/release connection)
+    (reset! connections {})))
 
 #?(:clj
    (.addShutdownHook (Runtime/getRuntime) (Thread. shutdown)))
@@ -93,6 +96,20 @@
        (if-let [conn (connection-for uri)]
          (storage/delete-database conn))))))
 
+(s/defschema StringOrConnection (s/if string? String ConnectionType))
+
+(s/defn release
+ [conn :- StringOrConnection]
+ (if (string? conn)
+   (when-let [c (@connections conn)]
+     (swap! connections dissoc conn)
+     (storage/release c))
+   (do
+     ;; if the connection is known then remove it
+     (when-let [u (ffirst (filter #(identical? conn (second %)) @connections))]
+       (swap! connections dissoc u))
+     (storage/release conn))))
+
 (s/defn get-database-names
   "Returns a seq of database names that this instance is aware of."
   []
@@ -145,7 +162,6 @@
 (def since storage/since)
 (def since-t storage/since-t)
 (def graph storage/graph)
-(def release storage/release)
 (def now internal/now)
 (def instant internal/instant)
 (def instant? internal/instant?)
