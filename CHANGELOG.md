@@ -1,5 +1,17 @@
 # Change Log
 
+## [2.3.3] - 2023-01-27
+### Changed
+- Moved dependency to ClojureScript 1.11.60.
+- `asami.core/release` now accepts a URL as well as a connection.
+
+### Fixed
+- `release` and `delete` now remove connections from the global connection map.
+- Closed durable databases will now throw exception on attempt to modify.
+- Fixed some calls to `ex-info`.
+- No longer eroneously using `clojure.core/format` in ClojureScript.
+- Various ClojureScript syntax errors.
+
 ## [2.3.2] - 2022-07-10
 ### Changed
 - Allows greater flexibility on node types in graphs.
@@ -330,7 +342,8 @@
 ### Added
 - Introduced Update Annotations
 
-[Unreleased]: https://github.com/quoll/asami/compare/2.3.2...HEAD
+[Unreleased]: https://github.com/quoll/asami/compare/2.3.3...HEAD
+[2.3.3]: https://github.com/quoll/asami/compare/2.3.2...2.3.3
 [2.3.2]: https://github.com/quoll/asami/compare/2.3.1...2.3.2
 [2.3.1]: https://github.com/quoll/asami/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/threatgrid/asami/compare/2.2.4...HEAD
