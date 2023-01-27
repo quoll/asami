@@ -344,7 +344,7 @@ The command will also work on `local` stores, which means that they can be loade
 
 Copyright © 2016-2021 Cisco Systems
 
-Copyright © 2015-2022 <a rel="me" href="https://hachyderm.io/@quoll">Paula Gearon</a>
+Copyright © 2015-2023 <a rel="me" href="https://hachyderm.io/@quoll">Paula Gearon</a>
 
 Portions of src/asami/cache.cljc are Copyright © Rich Hickey
 
