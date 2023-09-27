@@ -28,11 +28,15 @@
   (let [m1 (matching-vars `[?a :rel ?c] `[?a ?b ?c] )
         m2 (matching-vars `[?b :rel ?f] `[?a ?b ?c ?d ?e ?f])
         m3 (matching-vars `[?b :rel ?f ?b :r2 ?e] `[?a ?b ?c ?d ?e ?f])
-        m4 (matching-vars `[?x :rel ?f ?x :r2 ?e] `[?a ?b ?c ?d ?e ?f])]
+        m4 (matching-vars `[?x :rel ?f ?x :r2 ?e] `[?a ?b ?c ?d ?e ?f])
+        m5 (matching-vars `[?b :rel ?u/f] `[?a ?b ?c ?d ?e ?u/f])
+        m6 (matching-vars `[?b :rel ?u/f ?u/c ?v/d] `[?a ?b ?c ?u/d ?e ?u/f])]
     (is (= m1 {0 0, 2 2}))
     (is (= m2 {0 1, 2 5}))
     (is (= m3 {0 1, 2 5, 3 1, 5 4}))
-    (is (= m4 {2 5, 5 4}))))
+    (is (= m4 {2 5, 5 4}))
+    (is (= m5 {0 1, 2 5}))
+    (is (= m6 {0 1, 2 5}))))
 
 (def join-data
   [[:b :px :c]
@@ -55,6 +59,20 @@
     (is (= '[?o ?q] (:cols (meta r2))))
     (is (= [[:b :c] [:b :d]] r2))))
 
+(deftest ns-test-join
+  (let [graph (assert-data empty-graph join-data)
+        part-result (with-meta
+                      [[:p1 :b] [:p2 :z] [:p3 :x] [:p3 :t]]
+                      {:cols '[?p ?u/o]})
+        r1 (pattern-left-join graph part-result '[?u/o :px :c])
+        part-result2 (with-meta [[:b]] {:cols '[?u/o]})
+        r2 (pattern-left-join graph part-result2 '[?u/o :px ?q])]
+    (is (= '[?p ?u/o] (:cols (meta r1))))
+    (is (= [[:p1 :b] [:p2 :z] [:p3 :x]] r1))
+    (is (= '[?u/o ?q] (:cols (meta r2))))
+    (is (= [[:b :c] [:b :d]] r2))))
+
+(defn bnd [names vals] (with-meta vals {:cols names}))
 (defn bnd [names vals] (with-meta vals {:cols names}))
 
 (deftest test-outer-product

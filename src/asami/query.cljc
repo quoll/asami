@@ -237,7 +237,9 @@
       (with-meta (filter filter-fn part) m)
       (catch #?(:clj Throwable :cljs :default) e
         (throw (if-let [ev (some (partial missing var-index) args)]
-                 (ex-info (str "Unknown variable in filter: " (name ev)) {:vars (keys var-index) :filter-var ev})
+                 (ex-info (str "Unknown variable in filter: " (if-let [nms  (namespace ev)]
+                                                                (str nms \/ (name ev))
+                                                                (name ev))) {:vars (keys var-index) :filter-var ev})
                  (ex-info (str "Error executing filter: " e) {:error e})))))))
 
 (s/defn binding-join
@@ -420,7 +422,7 @@
     :default (pattern-error pattern)))
 
 (s/def InSpec (s/conditional #(= '$ %) s/Symbol
-                             #(and (symbol? %) (= \? (first (name %)))) s/Symbol
+                             #(and (symbol? %) (= \? (first (or (namespace %) (name %))))) s/Symbol
                              #(and sequential? (sequential? (first %))) [[s/Symbol]]
                              :else [s/Symbol]))
 
@@ -722,7 +724,10 @@
 (s/defn agg-label :- s/Symbol
   "Converts an aggregate operation on a symbol into a symbol name"
   [[op v]]
-  (symbol (str "?" (name op) "-" (if (planner/wildcard? v) "all" (subs (name v) 1)))))
+  (let [short-name (if-let [nms (namespace v)]
+                     (str (subs (namespace v) 1) \_ (name v))
+                     (subs (name v) 1))]
+    (symbol (str "?" (name op) "-" (if (planner/wildcard? v) "all" short-name)))))
 
 (s/defn result-label :- s/Symbol
   "Convert an element from a select/find clause into an appropriate label.

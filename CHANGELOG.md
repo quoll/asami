@@ -1,5 +1,9 @@
 # Change Log
 
+## [2.3.4] - 2023-09-27
+### Changed
+- Queries can now used variables with namespaces.
+
 ## [2.3.3] - 2023-01-27
 ### Changed
 - Moved dependency to ClojureScript 1.11.60.
@@ -342,7 +346,8 @@
 ### Added
 - Introduced Update Annotations
 
-[Unreleased]: https://github.com/quoll/asami/compare/2.3.3...HEAD
+[Unreleased]: https://github.com/quoll/asami/compare/2.3.4...HEAD
+[2.3.4]: https://github.com/quoll/asami/compare/2.3.3...2.3.4
 [2.3.3]: https://github.com/quoll/asami/compare/2.3.2...2.3.3
 [2.3.2]: https://github.com/quoll/asami/compare/2.3.1...2.3.2
 [2.3.1]: https://github.com/quoll/asami/compare/2.3.0...2.3.1

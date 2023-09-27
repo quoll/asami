@@ -53,11 +53,15 @@
    (s/one EntityPropAxiomElt "property")
    (s/one EntityPropValAxiomElt "value")])
 
-(def Var (s/constrained s/Symbol (comp #{\? \%} first name)))
+(def var-marker? #{\? \%})
+
+(def Var (s/constrained s/Symbol #(or (var-marker? (first (name %)))
+                                      (var-marker? (first (namespace %))))))
 
 (s/defn vartest? :- s/Bool
   [x]
-  (and (symbol? x) (boolean (#{\? \%} (first (name x))))))
+  (and (symbol? x) (boolean (or (var-marker? (first (name x)))
+                                (var-marker? (first (namespace x)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

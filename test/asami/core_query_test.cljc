@@ -51,11 +51,26 @@
       (is (= (set data) (set results)))
       (is (= #{["Paul McCartney"] ["George Harrison"] ["John Lennon"]} (set artists)))))
 
+  (deftest test-ns-simple-query
+    (let [results (q '[:find ?e ?us/a ?v
+                       :where [?e ?us/a ?v]] store)
+          artists (q '[:find ?artist
+                       :where [?tst/e :artist/name ?artist]] store)]
+      (is (= (set data) (set results)))
+      (is (= #{["Paul McCartney"] ["George Harrison"] ["John Lennon"]} (set artists)))))
+
   (deftest test-join-query
     (let [results (q '[:find ?name
                        :where [?r :release/name "My Sweet Lord"]
                        [?r :release/artists ?a]
                        [?a :artist/name ?name]] store)]
+      (is (= [["Paul McCartney"]] results))))
+
+  (deftest test-ns-join-query
+    (let [results (q '[:find ?u/name
+                       :where [?r :release/name "My Sweet Lord"]
+                       [?r :release/artists ?a]
+                       [?a :artist/name ?u/name]] store)]
       (is (= [["Paul McCartney"]] results))))
 
   (deftest test-join-multi-query
