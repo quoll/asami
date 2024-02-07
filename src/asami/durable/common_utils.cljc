@@ -13,7 +13,7 @@
 (def ^:const directory-env "ASAMI_BASE_DIR")
 
 #?(:clj
-   (defn get-directory
+   (defn ^File get-directory
      ([name] (get-directory name true))
      ([name test?]
       (let [[root & path-elements] (string/split name #"/")]
