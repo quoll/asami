@@ -42,7 +42,7 @@
 
 (def ^:const block-bytes "Number of bytes in a full block" (* block-max tuple-size-bytes))
 
-(def ^:const half-block-bytes "Number of bytes in a full block" (bit-shift-right block-bytes 1))
+(def ^:const half-block-bytes "Half the number of bytes in a full block" (bit-shift-right block-bytes 1))
 
 ;; 10 bits required to measure block-size
 (def ^:const reference-mask 0x003FFFFFFFFFFFFF)
