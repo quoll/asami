@@ -10,7 +10,7 @@
   (when obj
     (AccessController/doPrivileged
      (proxy [PrivilegedAction] []
-       (run [_]
+       (run []
          (try
            (let [get-cleaner-method (.getMethod (class obj) "cleaner" (make-array Class 0))
                  _ (.setAccessible get-cleaner-method true)
