@@ -16,7 +16,7 @@ Asami is both similar to and different from other graph databases. Some of the g
 - **Stable**. Storage uses immutable structures to ensure that writes cannot lead to data corruption.
 - **Multiplatform**. Asami runs on the Java Virtual Machine and on JavaScript platforms (browsers, node.js, etc).
 - **Ease of setup**. Asami managed storage requires no provisioning, and can be created in a single statement.
-- **Plugable**. Storage is a pluggable system that allows for multiple storage types, both local and remote.
+- **Pluggable**. Storage is a pluggable system that allows for multiple storage types, both local and remote.
 - **Analytics**. Graph analytics are provided by using internal mechanisms for efficiency.
 
 Asami is a _schemaless_ database, meaning that data may be inserted with no predefined schema. This flexibility has advantages and disadvantages. It is easier to load and evolve data over time without a schema. However, functionality like upsert and basic integrity checking is not available in the same way as with a graph with a predefined schema. Optional schemas are on the roadmap to help with this.
